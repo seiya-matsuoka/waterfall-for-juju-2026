@@ -1,0 +1,161 @@
+:root {
+  color-scheme: dark;
+  --scene-bg: #02050a;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: var(--scene-bg);
+}
+
+body {
+  touch-action: none;
+  overscroll-behavior: none;
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+
+.impreza-scene,
+#impreza-canvas,
+.impreza-overlay {
+  position: absolute;
+  inset: 0;
+}
+
+.impreza-scene {
+  overflow: hidden;
+  touch-action: none;
+  overscroll-behavior: none;
+  background:
+    radial-gradient(
+      circle at 50% 14%,
+      rgba(119, 214, 255, 0.12),
+      transparent 26%
+    ),
+    radial-gradient(
+      circle at 82% 28%,
+      rgba(255, 152, 68, 0.06),
+      transparent 18%
+    ),
+    radial-gradient(
+      circle at 18% 78%,
+      rgba(74, 154, 255, 0.08),
+      transparent 22%
+    ),
+    linear-gradient(180deg, #01040a 0%, #08111c 36%, #091523 58%, #02060b 100%);
+}
+
+#impreza-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+.impreza-overlay {
+  pointer-events: none;
+}
+
+.edge-vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      circle at 50% 50%,
+      transparent 34%,
+      rgba(0, 0, 0, 0.14) 68%,
+      rgba(0, 0, 0, 0.5) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.04),
+      transparent 16%,
+      transparent 84%,
+      rgba(0, 0, 0, 0.22)
+    );
+  mix-blend-mode: multiply;
+}
+
+.top-gloss {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.1),
+      rgba(255, 255, 255, 0.04) 10%,
+      rgba(255, 255, 255, 0) 18%
+    ),
+    radial-gradient(
+      circle at 50% 8%,
+      rgba(255, 255, 255, 0.12),
+      transparent 24%
+    );
+  mix-blend-mode: screen;
+  opacity: 0.52;
+}
+
+.grain-layer {
+  position: absolute;
+  inset: 0;
+  opacity: 0.04;
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    rgba(255, 255, 255, 0.88) 0.55px,
+    transparent 0.74px
+  );
+  background-size: 4px 4px;
+  mix-blend-mode: soft-light;
+}
+
+.hidden-ju {
+  position: absolute;
+  right: 10.5%;
+  bottom: 17%;
+  color: rgba(244, 248, 255, 0.15);
+  font-size: clamp(10px, 2.5vw, 13px);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  transform: rotate(-12deg);
+  text-transform: lowercase;
+  user-select: none;
+}
+
+.motion-permission-button {
+  position: absolute;
+  top: max(14px, env(safe-area-inset-top, 0px) + 6px);
+  right: 14px;
+  z-index: 5;
+  display: none;
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background: rgba(10, 14, 20, 0.36);
+  color: rgba(245, 249, 255, 0.76);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.motion-permission-button.is-visible {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
