@@ -121,17 +121,17 @@ body {
   position: absolute;
   right: 11%;
   bottom: 15%;
-  color: rgba(248, 252, 255, 0.86);
-  font-size: clamp(24px, 6.8vw, 44px);
+  color: rgba(250, 253, 255, 0.94);
+  font-size: clamp(28px, 8vw, 54px);
   font-weight: 600;
   letter-spacing: 0.14em;
   transform: rotate(-10deg);
   text-transform: lowercase;
   user-select: none;
   text-shadow:
-    0 0 10px rgba(255, 255, 255, 0.54),
-    0 0 24px rgba(212, 241, 255, 0.5),
-    0 0 52px rgba(122, 212, 255, 0.3);
+    0 0 12px rgba(255, 255, 255, 0.68),
+    0 0 28px rgba(222, 245, 255, 0.58),
+    0 0 62px rgba(138, 220, 255, 0.38);
 }
 
 .motion-permission-button {
