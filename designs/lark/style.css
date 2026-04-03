@@ -1,0 +1,141 @@
+:root {
+  color-scheme: dark;
+  --scene-bg: #020202;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: var(--scene-bg);
+}
+
+body {
+  touch-action: none;
+  overscroll-behavior: none;
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+
+.lark-scene,
+#lark-canvas,
+.lark-overlay {
+  position: absolute;
+  inset: 0;
+}
+
+.lark-scene {
+  overflow: hidden;
+  touch-action: none;
+  overscroll-behavior: none;
+  background:
+    radial-gradient(
+      circle at 50% 84%,
+      rgba(129, 10, 22, 0.22),
+      transparent 26%
+    ),
+    radial-gradient(
+      circle at 54% 88%,
+      rgba(255, 149, 67, 0.08),
+      transparent 16%
+    ),
+    linear-gradient(180deg, #010101 0%, #040404 100%);
+}
+
+#lark-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+.lark-overlay {
+  pointer-events: none;
+}
+
+.scene-vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      circle at 50% 48%,
+      transparent 22%,
+      rgba(0, 0, 0, 0.12) 60%,
+      rgba(0, 0, 0, 0.55) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.02),
+      transparent 12%,
+      transparent 88%,
+      rgba(0, 0, 0, 0.18)
+    );
+  mix-blend-mode: multiply;
+}
+
+.scene-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.032;
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    rgba(255, 255, 255, 0.82) 0.52px,
+    transparent 0.72px
+  );
+  background-size: 4px 4px;
+  mix-blend-mode: soft-light;
+}
+
+.hidden-ju {
+  position: absolute;
+  left: 50%;
+  top: 56%;
+  transform: translate(-50%, -50%) rotate(-8deg);
+  color: rgba(255, 248, 242, 0.12);
+  font-size: clamp(18px, 5vw, 30px);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: lowercase;
+  user-select: none;
+  text-shadow:
+    0 0 10px rgba(255, 255, 255, 0.08),
+    0 0 18px rgba(255, 170, 92, 0.06);
+}
+
+.motion-permission-button {
+  position: absolute;
+  top: max(14px, env(safe-area-inset-top, 0px) + 6px);
+  right: 14px;
+  z-index: 5;
+  display: none;
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background: rgba(10, 10, 10, 0.34);
+  color: rgba(245, 249, 255, 0.76);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  pointer-events: auto;
+}
+
+.motion-permission-button.is-visible {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}

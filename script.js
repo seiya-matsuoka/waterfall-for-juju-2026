@@ -4,6 +4,7 @@
 
   const designMap = {
     impreza: "./designs/impreza/index.html",
+    lark: "./designs/lark/index.html",
   };
 
   const validDesigns = new Set(Object.keys(designMap));
