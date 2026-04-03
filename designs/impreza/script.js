@@ -147,28 +147,30 @@
 
   const streakLayers = [
     {
-      count: 28,
-      alpha: 0.085,
-      width: 1.4,
-      speed: 250,
-      slant: -0.01,
-      jitter: 5,
-    },
-    { count: 24, alpha: 0.06, width: 1.3, speed: 205, slant: 0.018, jitter: 7 },
-    {
-      count: 18,
-      alpha: 0.045,
+      count: 44,
+      alpha: 0.12,
       width: 1.5,
-      speed: 168,
-      slant: -0.05,
-      jitter: 10,
+      speed: 270,
+      slant: -0.004,
+      jitter: 4,
+    },
+    { count: 36, alpha: 0.09, width: 1.4, speed: 228, slant: 0.012, jitter: 6 },
+    {
+      count: 28,
+      alpha: 0.065,
+      width: 1.6,
+      speed: 184,
+      slant: -0.04,
+      jitter: 8,
     },
   ];
 
   const airLayers = [
-    { y: 0.24, width: 0.42, alpha: 0.05, speed: 70, slant: -0.02 },
-    { y: 0.52, width: 0.5, alpha: 0.06, speed: 56, slant: 0.012 },
-    { y: 0.76, width: 0.36, alpha: 0.04, speed: 62, slant: -0.04 },
+    { y: 0.18, width: 0.5, alpha: 0.07, speed: 82, slant: -0.01 },
+    { y: 0.34, width: 0.42, alpha: 0.06, speed: 68, slant: 0.008 },
+    { y: 0.52, width: 0.56, alpha: 0.085, speed: 60, slant: 0.01 },
+    { y: 0.7, width: 0.46, alpha: 0.06, speed: 74, slant: -0.028 },
+    { y: 0.84, width: 0.34, alpha: 0.05, speed: 64, slant: -0.038 },
   ];
 
   function resize() {
@@ -262,31 +264,31 @@
     );
 
     state.motion.targetShiftX = clamp(
-      state.motion.targetShiftX + dxNorm * 230,
-      -230,
-      230,
+      state.motion.targetShiftX + dxNorm * 260,
+      -360,
+      360,
     );
     state.motion.targetShiftY = clamp(
-      state.motion.targetShiftY + dyNorm * 92,
-      -110,
-      110,
+      state.motion.targetShiftY + dyNorm * 110,
+      -150,
+      150,
     );
 
     state.motion.targetSpeedX = clamp(
-      state.motion.targetSpeedX + dxNorm * 6.2,
-      -4.2,
-      4.2,
+      state.motion.targetSpeedX + dxNorm * 6.6,
+      -4.8,
+      4.8,
     );
     state.motion.targetSpeedY = clamp(
-      state.motion.targetSpeedY + dyNorm * 3.6,
-      -2.4,
-      2.4,
+      state.motion.targetSpeedY + dyNorm * 3.8,
+      -2.8,
+      2.8,
     );
 
     state.motion.targetPressure = clamp(
       state.motion.targetPressure + speed * 0.22 + Math.abs(dxNorm) * 0.7,
       0,
-      2,
+      2.2,
     );
 
     if (speed > 0.18) {
@@ -376,16 +378,42 @@
     state.time += deltaSeconds;
 
     if (!state.pointer.active) {
-      state.pointer.velocityX *= decay(0.9, deltaSeconds);
-      state.pointer.velocityY *= decay(0.9, deltaSeconds);
+      state.pointer.velocityX *= decay(0.92, deltaSeconds);
+      state.pointer.velocityY *= decay(0.92, deltaSeconds);
+
+      state.motion.targetSpeedX = clamp(
+        state.motion.targetSpeedX + state.pointer.velocityX * 0.00022,
+        -4.8,
+        4.8,
+      );
+      state.motion.targetSpeedY = clamp(
+        state.motion.targetSpeedY + state.pointer.velocityY * 0.00014,
+        -2.8,
+        2.8,
+      );
+
+      state.motion.targetShiftX = clamp(
+        state.motion.targetShiftX +
+          state.motion.targetSpeedX * deltaSeconds * 220,
+        -360,
+        360,
+      );
+      state.motion.targetShiftY = clamp(
+        state.motion.targetShiftY +
+          state.motion.targetSpeedY * deltaSeconds * 120,
+        -150,
+        150,
+      );
 
       state.motion.targetSurfaceTiltY = clamp(
-        state.motion.targetSurfaceTiltY + state.pointer.velocityX * 0.00024,
+        state.motion.targetSurfaceTiltY +
+          state.motion.targetSpeedX * deltaSeconds * 0.9,
         -1.22,
         1.22,
       );
       state.motion.targetSurfaceTiltX = clamp(
-        state.motion.targetSurfaceTiltX - state.pointer.velocityY * 0.00018,
+        state.motion.targetSurfaceTiltX +
+          state.motion.targetSpeedY * deltaSeconds * 0.5,
         -0.95,
         0.95,
       );
@@ -394,13 +422,13 @@
       state.motion.targetSpeedY += Math.cos(state.time * 0.31) * 0.0012;
     }
 
-    state.motion.targetSurfaceTiltX *= decay(0.974, deltaSeconds);
-    state.motion.targetSurfaceTiltY *= decay(0.974, deltaSeconds);
-    state.motion.targetShiftX *= decay(0.958, deltaSeconds);
-    state.motion.targetShiftY *= decay(0.958, deltaSeconds);
-    state.motion.targetSpeedX *= decay(0.934, deltaSeconds);
-    state.motion.targetSpeedY *= decay(0.94, deltaSeconds);
-    state.motion.targetPressure *= decay(0.936, deltaSeconds);
+    state.motion.targetSurfaceTiltX *= decay(0.984, deltaSeconds);
+    state.motion.targetSurfaceTiltY *= decay(0.986, deltaSeconds);
+    state.motion.targetShiftX *= decay(0.996, deltaSeconds);
+    state.motion.targetShiftY *= decay(0.996, deltaSeconds);
+    state.motion.targetSpeedX *= decay(0.974, deltaSeconds);
+    state.motion.targetSpeedY *= decay(0.978, deltaSeconds);
+    state.motion.targetPressure *= decay(0.948, deltaSeconds);
 
     const ambientX =
       Math.sin(state.time * 0.54) * 0.03 + Math.cos(state.time * 0.16) * 0.014;
@@ -489,7 +517,7 @@
 
     for (let i = 0; i <= steps; i += 1) {
       const p = i / steps;
-      const x = -state.width * 0.18 + p * state.width * 1.36;
+      const x = -state.width * 0.34 + p * state.width * 1.68;
 
       const broadCurve =
         Math.pow(p - 0.5, 2) * state.height * spec.camber +
@@ -500,7 +528,7 @@
         Math.tanh((p - 0.64) * 14) * state.height * spec.breakB;
 
       const fineCurve =
-        Math.sin(p * Math.PI * 1.4 + state.time * 0.12 + spec.phase) *
+        Math.sin(p * Math.PI * 1.4 + state.time * 0.2 + spec.phase) *
         state.height *
         spec.fine;
 
@@ -536,7 +564,7 @@
       });
 
       bottomPoints.push({
-        x: x + xShift + 14 + state.motion.surfaceTiltY * 10,
+        x: x + xShift + 16 + state.motion.surfaceTiltY * 10,
         y: centerY + thickness * 0.46,
       });
     }
@@ -586,16 +614,19 @@
 
   function drawBodyPanel(spec, index) {
     const { topPoints, bottomPoints } = createBodyPanelPath(spec);
-    const shimmer = Math.sin(state.time * 0.34 + spec.phase) * 0.04;
+    const shimmer =
+      Math.sin(state.time * 0.5 + spec.phase) * 0.06 +
+      Math.cos(state.time * 0.24 + spec.phase) * 0.028;
 
     ctx.save();
     fillPathFromPoints(topPoints, bottomPoints);
     ctx.clip();
 
+    ctx.globalAlpha = 0.9;
     const fill = ctx.createLinearGradient(
-      -state.width * 0.08 + state.motion.shiftX * 0.14 + shimmer * state.width,
+      -state.width * 0.12 + state.motion.shiftX * 0.14 + shimmer * state.width,
       state.height * (spec.y - 0.18),
-      state.width * 1.08 + state.motion.shiftX * 0.14 + shimmer * state.width,
+      state.width * 1.16 + state.motion.shiftX * 0.14 + shimmer * state.width,
       state.height * (spec.y + 0.22),
     );
     fill.addColorStop(0, spec.colors[0]);
@@ -605,13 +636,14 @@
     fill.addColorStop(1, spec.colors[4]);
     ctx.fillStyle = fill;
     ctx.fillRect(
-      -state.width * 0.28,
-      -state.height * 0.2,
-      state.width * 1.76,
-      state.height * 1.4,
+      -state.width * 0.45,
+      -state.height * 0.24,
+      state.width * 2.05,
+      state.height * 1.5,
     );
 
     ctx.globalCompositeOperation = "screen";
+    ctx.globalAlpha = 1;
 
     const broadFace = ctx.createLinearGradient(
       state.width * (-0.04 + state.motion.surfaceTiltY * 0.02 + shimmer * 0.4),
@@ -620,85 +652,108 @@
       state.height,
     );
     broadFace.addColorStop(0, "rgba(255,255,255,0)");
-    broadFace.addColorStop(0.22, "rgba(255,255,255,0.03)");
-    broadFace.addColorStop(0.38, "rgba(183,227,255,0.12)");
-    broadFace.addColorStop(0.56, "rgba(255,255,255,0.06)");
-    broadFace.addColorStop(0.72, "rgba(78, 187, 255, 0.11)");
-    broadFace.addColorStop(0.9, "rgba(255,255,255,0.02)");
+    broadFace.addColorStop(0.22, "rgba(255,255,255,0.04)");
+    broadFace.addColorStop(0.38, "rgba(183,227,255,0.15)");
+    broadFace.addColorStop(0.56, "rgba(255,255,255,0.08)");
+    broadFace.addColorStop(0.72, "rgba(78, 187, 255, 0.14)");
+    broadFace.addColorStop(0.9, "rgba(255,255,255,0.025)");
     broadFace.addColorStop(1, "rgba(255,255,255,0)");
     ctx.fillStyle = broadFace;
     ctx.fillRect(
-      -state.width * 0.2,
-      -state.height * 0.16,
-      state.width * 1.62,
-      state.height * 1.32,
+      -state.width * 0.26,
+      -state.height * 0.18,
+      state.width * 1.84,
+      state.height * 1.38,
     );
 
     const hardPlane = ctx.createLinearGradient(
       state.width *
-        (0.06 +
+        (0.04 +
           index * 0.08 +
-          state.motion.surfaceTiltY * 0.028 +
-          shimmer * 0.6),
+          state.motion.surfaceTiltY * 0.03 +
+          shimmer * 0.65),
       0,
       state.width *
-        (0.34 +
+        (0.32 +
           index * 0.09 +
-          state.motion.surfaceTiltY * 0.04 +
-          shimmer * 0.8),
+          state.motion.surfaceTiltY * 0.045 +
+          shimmer * 0.9),
       state.height,
     );
     hardPlane.addColorStop(0, "rgba(255,255,255,0)");
-    hardPlane.addColorStop(0.2, "rgba(255,255,255,0.06)");
-    hardPlane.addColorStop(0.34, "rgba(255,255,255,0.44)");
-    hardPlane.addColorStop(0.42, "rgba(171,225,255,0.16)");
-    hardPlane.addColorStop(0.5, "rgba(255,255,255,0.03)");
+    hardPlane.addColorStop(0.18, "rgba(255,255,255,0.08)");
+    hardPlane.addColorStop(0.32, "rgba(255,255,255,0.62)");
+    hardPlane.addColorStop(0.4, "rgba(171,225,255,0.22)");
+    hardPlane.addColorStop(0.48, "rgba(255,255,255,0.04)");
     hardPlane.addColorStop(1, "rgba(255,255,255,0)");
     ctx.fillStyle = hardPlane;
     ctx.fillRect(
-      -state.width * 0.16,
-      -state.height * 0.14,
-      state.width * 1.48,
-      state.height * 1.28,
+      -state.width * 0.2,
+      -state.height * 0.16,
+      state.width * 1.62,
+      state.height * 1.34,
     );
 
     const facetShadow = ctx.createLinearGradient(
-      state.width * (0.32 + index * 0.08),
+      state.width * (0.3 + index * 0.08),
       0,
-      state.width * (0.58 + index * 0.08),
+      state.width * (0.56 + index * 0.08),
       state.height,
     );
     facetShadow.addColorStop(0, "rgba(0,0,0,0)");
     facetShadow.addColorStop(0.34, "rgba(0,0,0,0.02)");
-    facetShadow.addColorStop(0.46, "rgba(0,0,0,0.12)");
-    facetShadow.addColorStop(0.58, "rgba(0,0,0,0.04)");
+    facetShadow.addColorStop(0.46, "rgba(0,0,0,0.14)");
+    facetShadow.addColorStop(0.58, "rgba(0,0,0,0.045)");
     facetShadow.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = facetShadow;
     ctx.fillRect(
-      -state.width * 0.12,
-      -state.height * 0.14,
-      state.width * 1.42,
-      state.height * 1.24,
+      -state.width * 0.18,
+      -state.height * 0.16,
+      state.width * 1.58,
+      state.height * 1.3,
     );
 
     const facetHighlight = ctx.createLinearGradient(
-      state.width * (0.48 + index * 0.06 + shimmer * 0.4),
+      state.width * (0.46 + index * 0.06 + shimmer * 0.45),
       0,
-      state.width * (0.72 + index * 0.06 + shimmer * 0.55),
+      state.width * (0.72 + index * 0.06 + shimmer * 0.62),
       state.height,
     );
     facetHighlight.addColorStop(0, "rgba(255,255,255,0)");
-    facetHighlight.addColorStop(0.28, "rgba(255,255,255,0.02)");
-    facetHighlight.addColorStop(0.42, "rgba(255,255,255,0.22)");
-    facetHighlight.addColorStop(0.5, "rgba(176,226,255,0.08)");
-    facetHighlight.addColorStop(0.58, "rgba(255,255,255,0.015)");
+    facetHighlight.addColorStop(0.26, "rgba(255,255,255,0.03)");
+    facetHighlight.addColorStop(0.4, "rgba(255,255,255,0.28)");
+    facetHighlight.addColorStop(0.48, "rgba(176,226,255,0.11)");
+    facetHighlight.addColorStop(0.56, "rgba(255,255,255,0.02)");
     facetHighlight.addColorStop(1, "rgba(255,255,255,0)");
     ctx.fillStyle = facetHighlight;
     ctx.fillRect(
-      -state.width * 0.12,
-      -state.height * 0.14,
-      state.width * 1.42,
-      state.height * 1.24,
+      -state.width * 0.18,
+      -state.height * 0.16,
+      state.width * 1.58,
+      state.height * 1.3,
+    );
+
+    const movingSheen = ctx.createLinearGradient(
+      -state.width * 0.12 +
+        ((state.time * 80 + spec.phase * 30 + state.motion.speedX * 60) %
+          (state.width * 1.3)),
+      0,
+      state.width * 0.2 +
+        ((state.time * 80 + spec.phase * 30 + state.motion.speedX * 60) %
+          (state.width * 1.3)),
+      state.height,
+    );
+    movingSheen.addColorStop(0, "rgba(255,255,255,0)");
+    movingSheen.addColorStop(0.36, "rgba(255,255,255,0.08)");
+    movingSheen.addColorStop(0.5, "rgba(255,255,255,0.36)");
+    movingSheen.addColorStop(0.62, "rgba(170,224,255,0.12)");
+    movingSheen.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = movingSheen;
+    ctx.fillRect(
+      -state.width * 0.32,
+      -state.height * 0.18,
+      state.width * 1.96,
+      state.height * 1.36,
     );
 
     const lowerShadow = ctx.createLinearGradient(0, 0, 0, state.height);
@@ -761,17 +816,17 @@
           state.motion.surfaceTiltX * 8;
 
         const startX =
-          ((state.time * layer.speed + state.motion.speedX * 260 + i * 120) %
-            (state.width * 1.56)) -
-          state.width * 0.28;
+          ((state.time * layer.speed + state.motion.speedX * 280 + i * 90) %
+            (state.width * 1.64)) -
+          state.width * 0.34;
 
         const length =
           state.width *
-          (0.16 + p * 0.12 + Math.abs(state.motion.speedX) * 0.02);
+          (0.16 + p * 0.12 + Math.abs(state.motion.speedX) * 0.024);
         const slant =
           state.height *
           (layer.slant +
-            state.motion.speedY * 0.03 +
+            state.motion.speedY * 0.028 +
             state.motion.surfaceTiltY * 0.01);
 
         const gradient = ctx.createLinearGradient(
@@ -781,10 +836,10 @@
           baseY + slant,
         );
         gradient.addColorStop(0, "rgba(255,255,255,0)");
-        gradient.addColorStop(0.18, "rgba(255,255,255,0.018)");
+        gradient.addColorStop(0.18, "rgba(255,255,255,0.022)");
         gradient.addColorStop(0.42, `rgba(165, 227, 255, ${layer.alpha})`);
-        gradient.addColorStop(0.68, `rgba(255,255,255,${layer.alpha * 2.1})`);
-        gradient.addColorStop(0.88, `rgba(92, 197, 255, ${layer.alpha * 0.9})`);
+        gradient.addColorStop(0.68, `rgba(255,255,255,${layer.alpha * 2.2})`);
+        gradient.addColorStop(0.88, `rgba(92, 197, 255, ${layer.alpha})`);
         gradient.addColorStop(1, "rgba(255,255,255,0)");
 
         ctx.strokeStyle = gradient;
@@ -804,32 +859,37 @@
     ctx.globalCompositeOperation = "screen";
 
     airLayers.forEach((layer, index) => {
-      const x =
-        ((state.time * layer.speed + state.motion.speedX * 160 + index * 220) %
-          (state.width * 1.7)) -
-        state.width * 0.35;
-      const y =
-        state.height * layer.y +
-        state.motion.surfaceTiltX * 10 +
-        Math.sin(state.time * 0.22 + index) * 8;
+      for (let pass = 0; pass < 2; pass += 1) {
+        const x =
+          ((state.time * (layer.speed + pass * 14) +
+            state.motion.speedX * 180 +
+            index * 220 +
+            pass * 140) %
+            (state.width * 1.78)) -
+          state.width * 0.38;
+        const y =
+          state.height * layer.y +
+          state.motion.surfaceTiltX * 10 +
+          Math.sin(state.time * 0.22 + index + pass * 0.8) * 9;
 
-      const w = state.width * layer.width;
-      const h = state.height * 0.18;
+        const w = state.width * (layer.width - pass * 0.08);
+        const h = state.height * (0.18 - pass * 0.03);
 
-      const grad = ctx.createLinearGradient(
-        x,
-        y,
-        x + w,
-        y + state.height * layer.slant,
-      );
-      grad.addColorStop(0, "rgba(255,255,255,0)");
-      grad.addColorStop(0.2, `rgba(200, 236, 255, ${layer.alpha * 0.42})`);
-      grad.addColorStop(0.42, `rgba(255,255,255,${layer.alpha})`);
-      grad.addColorStop(0.7, `rgba(141, 214, 255, ${layer.alpha * 0.55})`);
-      grad.addColorStop(1, "rgba(255,255,255,0)");
+        const grad = ctx.createLinearGradient(
+          x,
+          y,
+          x + w,
+          y + state.height * layer.slant,
+        );
+        grad.addColorStop(0, "rgba(255,255,255,0)");
+        grad.addColorStop(0.18, `rgba(200, 236, 255, ${layer.alpha * 0.5})`);
+        grad.addColorStop(0.42, `rgba(255,255,255,${layer.alpha})`);
+        grad.addColorStop(0.7, `rgba(141, 214, 255, ${layer.alpha * 0.58})`);
+        grad.addColorStop(1, "rgba(255,255,255,0)");
 
-      ctx.fillStyle = grad;
-      ctx.fillRect(x, y - h * 0.5, w, h);
+        ctx.fillStyle = grad;
+        ctx.fillRect(x, y - h * 0.5, w, h);
+      }
     });
 
     ctx.restore();
