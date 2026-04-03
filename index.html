@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>waterfall-for-juju-2026</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <iframe
+        id="design-frame"
+        class="design-frame"
+        title="waterfall-for-juju-2026 design viewer"
+        src="./designs/impreza/index.html"
+        loading="eager"
+        allow="fullscreen"
+      ></iframe>
+
+      <nav class="design-switcher" aria-label="Design switcher">
+        <button
+          class="design-tab is-active"
+          type="button"
+          data-design="impreza"
+          aria-pressed="true"
+        >
+          Impreza
+        </button>
+
+        <button
+          class="design-tab is-disabled"
+          type="button"
+          disabled
+          aria-disabled="true"
+        >
+          LARK
+        </button>
+
+        <button
+          class="design-tab is-disabled"
+          type="button"
+          disabled
+          aria-disabled="true"
+        >
+          Sound
+        </button>
+      </nav>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
