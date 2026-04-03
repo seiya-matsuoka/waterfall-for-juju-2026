@@ -41,7 +41,11 @@
       targetSmokeLift: 0,
       emberPulse: 0,
       targetEmberPulse: 0,
+      topGlow: 0,
+      targetTopGlow: 0,
     },
+
+    disturbances: [],
 
     orientation: {
       enabled: false,
@@ -51,44 +55,59 @@
 
   const plumes = [
     {
-      baseX: 0.47,
-      baseY: 0.92,
-      topY: 0.1,
-      width: 0.07,
-      sway: 0.055,
-      phase: 0.1,
-      tilt: -0.1,
+      baseX: 0.5,
+      baseY: 0.972,
+      topY: 0.04,
+      startWidth: 0.014,
+      endWidth: 0.3,
+      sway: 0.1,
+      phase: 0.2,
+      tilt: -0.015,
       brightness: 1,
     },
     {
-      baseX: 0.52,
-      baseY: 0.94,
-      topY: 0.14,
-      width: 0.055,
-      sway: 0.048,
+      baseX: 0.455,
+      baseY: 0.962,
+      topY: 0.1,
+      startWidth: 0.012,
+      endWidth: 0.26,
+      sway: 0.09,
       phase: 1.2,
-      tilt: 0.08,
-      brightness: 0.9,
-    },
-    {
-      baseX: 0.43,
-      baseY: 0.9,
-      topY: 0.2,
-      width: 0.045,
-      sway: 0.04,
-      phase: 2.1,
       tilt: -0.12,
-      brightness: 0.72,
+      brightness: 0.84,
     },
     {
-      baseX: 0.57,
-      baseY: 0.9,
-      topY: 0.22,
-      width: 0.042,
-      sway: 0.036,
-      phase: 3.0,
+      baseX: 0.545,
+      baseY: 0.962,
+      topY: 0.1,
+      startWidth: 0.012,
+      endWidth: 0.26,
+      sway: 0.09,
+      phase: 2.0,
       tilt: 0.12,
-      brightness: 0.66,
+      brightness: 0.84,
+    },
+    {
+      baseX: 0.39,
+      baseY: 0.935,
+      topY: 0.18,
+      startWidth: 0.011,
+      endWidth: 0.22,
+      sway: 0.082,
+      phase: 3.0,
+      tilt: -0.18,
+      brightness: 0.6,
+    },
+    {
+      baseX: 0.61,
+      baseY: 0.935,
+      topY: 0.18,
+      startWidth: 0.011,
+      endWidth: 0.22,
+      sway: 0.082,
+      phase: 4.0,
+      tilt: 0.18,
+      brightness: 0.6,
     },
   ];
 
@@ -112,6 +131,24 @@
     return { x: event.clientX, y: event.clientY };
   }
 
+  function addDisturbance(x, y, velocityX, velocityY, strength = 1) {
+    state.disturbances.push({
+      x,
+      y,
+      vx: velocityX,
+      vy: velocityY,
+      strength,
+      life: 1,
+      radius:
+        Math.max(state.width, state.height) *
+        lerp(0.08, 0.18, Math.min(1, strength)),
+    });
+
+    if (state.disturbances.length > 18) {
+      state.disturbances.shift();
+    }
+  }
+
   function onPointerDown(event) {
     const point = getPoint(event);
     state.pointer.active = true;
@@ -120,6 +157,8 @@
     state.pointer.lastY = point.y;
     state.pointer.velocityX = 0;
     state.pointer.velocityY = 0;
+
+    addDisturbance(point.x, point.y, 0, -0.2, 0.4);
 
     if (event.pointerId != null && canvas.setPointerCapture) {
       try {
@@ -152,41 +191,49 @@
 
     const dxNorm = dx / Math.max(1, state.width);
     const dyNorm = dy / Math.max(1, state.height);
-    const speed = Math.min(1.5, Math.hypot(dx, dy) / 30);
+    const speed = Math.min(1.8, Math.hypot(dx, dy) / 28);
 
     state.motion.targetSwayX = clamp(
-      state.motion.targetSwayX + dxNorm * 2.2,
-      -1.2,
-      1.2,
+      state.motion.targetSwayX + dxNorm * 2.6,
+      -1.4,
+      1.4,
     );
     state.motion.targetSwayY = clamp(
-      state.motion.targetSwayY - dyNorm * 1.2,
-      -0.9,
-      0.9,
+      state.motion.targetSwayY - dyNorm * 1.35,
+      -1,
+      1,
     );
 
     state.motion.targetDragDriftX = clamp(
-      state.motion.targetDragDriftX + dxNorm * 170,
-      -180,
-      180,
+      state.motion.targetDragDriftX + dxNorm * 220,
+      -220,
+      220,
     );
     state.motion.targetDragDriftY = clamp(
-      state.motion.targetDragDriftY + dyNorm * 90,
-      -96,
-      96,
+      state.motion.targetDragDriftY + dyNorm * 120,
+      -130,
+      130,
     );
 
     state.motion.targetSmokeLift = clamp(
-      state.motion.targetSmokeLift + speed * 0.3 + Math.abs(dyNorm) * 0.4,
+      state.motion.targetSmokeLift + speed * 0.34 + Math.abs(dyNorm) * 0.48,
       0,
-      2,
+      2.4,
     );
 
     state.motion.targetEmberPulse = clamp(
-      state.motion.targetEmberPulse + speed * 0.22 + Math.abs(dxNorm) * 0.12,
+      state.motion.targetEmberPulse + speed * 0.26 + Math.abs(dxNorm) * 0.14,
       0,
-      1.6,
+      1.9,
     );
+
+    state.motion.targetTopGlow = clamp(
+      state.motion.targetTopGlow + speed * 0.2 + Math.abs(dyNorm) * 0.18,
+      0,
+      1.7,
+    );
+
+    addDisturbance(point.x, point.y, dx * 0.16, dy * 0.16 - 0.4, speed);
   }
 
   function onPointerUp(event) {
@@ -252,6 +299,24 @@
     }
   }
 
+  function updateDisturbances(deltaSeconds) {
+    for (let i = state.disturbances.length - 1; i >= 0; i -= 1) {
+      const d = state.disturbances[i];
+      d.x += d.vx;
+      d.y += d.vy;
+      d.vx *= decay(0.95, deltaSeconds);
+      d.vy *= decay(0.94, deltaSeconds);
+      d.vy -= 0.02;
+      d.life *= decay(0.95, deltaSeconds);
+      d.radius += 22 * deltaSeconds * 60;
+      d.strength *= decay(0.96, deltaSeconds);
+
+      if (d.life < 0.08 || d.strength < 0.05) {
+        state.disturbances.splice(i, 1);
+      }
+    }
+  }
+
   function update(deltaSeconds) {
     state.time += deltaSeconds;
 
@@ -259,41 +324,48 @@
       state.pointer.velocityX *= decay(0.9, deltaSeconds);
       state.pointer.velocityY *= decay(0.9, deltaSeconds);
 
-      state.motion.targetDragDriftX *= decay(0.985, deltaSeconds);
-      state.motion.targetDragDriftY *= decay(0.986, deltaSeconds);
-      state.motion.targetSmokeLift *= decay(0.954, deltaSeconds);
-      state.motion.targetEmberPulse *= decay(0.95, deltaSeconds);
+      state.motion.targetDragDriftX *= decay(0.986, deltaSeconds);
+      state.motion.targetDragDriftY *= decay(0.987, deltaSeconds);
+      state.motion.targetSmokeLift *= decay(0.956, deltaSeconds);
+      state.motion.targetEmberPulse *= decay(0.952, deltaSeconds);
+      state.motion.targetTopGlow *= decay(0.954, deltaSeconds);
     }
 
     const idleSwayX =
-      Math.sin(state.time * 0.42) * 0.12 + Math.cos(state.time * 0.17) * 0.04;
+      Math.sin(state.time * 0.42) * 0.14 + Math.cos(state.time * 0.17) * 0.05;
     const idleSwayY =
-      Math.cos(state.time * 0.34) * 0.08 + Math.sin(state.time * 0.12) * 0.03;
+      Math.cos(state.time * 0.34) * 0.09 + Math.sin(state.time * 0.12) * 0.035;
 
     const swayX = clamp(
-      state.motion.targetSwayX + state.motion.sensorX * 0.55 + idleSwayX,
-      -1.4,
-      1.4,
+      state.motion.targetSwayX + state.motion.sensorX * 0.58 + idleSwayX,
+      -1.5,
+      1.5,
     );
     const swayY = clamp(
-      state.motion.targetSwayY + state.motion.sensorY * 0.34 + idleSwayY,
-      -1,
-      1,
+      state.motion.targetSwayY + state.motion.sensorY * 0.38 + idleSwayY,
+      -1.1,
+      1.1,
     );
 
-    const dragX = state.motion.targetDragDriftX + state.motion.sensorX * 18;
-    const dragY = state.motion.targetDragDriftY + state.motion.sensorY * 14;
+    const dragX = state.motion.targetDragDriftX + state.motion.sensorX * 20;
+    const dragY = state.motion.targetDragDriftY + state.motion.sensorY * 16;
 
     const lift =
-      0.18 +
+      0.24 +
       state.motion.targetSmokeLift +
-      Math.abs(state.motion.sensorY) * 0.12 +
-      Math.abs(swayY) * 0.08;
+      Math.abs(state.motion.sensorY) * 0.16 +
+      Math.abs(swayY) * 0.1;
 
     const ember =
-      0.14 +
+      0.18 +
       state.motion.targetEmberPulse +
-      Math.abs(state.motion.sensorX) * 0.1;
+      Math.abs(state.motion.sensorX) * 0.12;
+
+    const topGlow =
+      0.26 +
+      state.motion.targetTopGlow +
+      Math.abs(state.motion.sensorX) * 0.12 +
+      Math.abs(state.motion.sensorY) * 0.1;
 
     state.motion.swayX = lerp(state.motion.swayX, swayX, 0.07);
     state.motion.swayY = lerp(state.motion.swayY, swayY, 0.07);
@@ -301,53 +373,154 @@
     state.motion.dragDriftY = lerp(state.motion.dragDriftY, dragY, 0.08);
     state.motion.smokeLift = lerp(state.motion.smokeLift, lift, 0.07);
     state.motion.emberPulse = lerp(state.motion.emberPulse, ember, 0.07);
+    state.motion.topGlow = lerp(state.motion.topGlow, topGlow, 0.07);
+
+    updateDisturbances(deltaSeconds);
+  }
+
+  function disturbanceOffset(x, y, t) {
+    let offsetX = 0;
+    let offsetY = 0;
+
+    for (const d of state.disturbances) {
+      const dx = x - d.x;
+      const dy = y - d.y;
+      const distance = Math.hypot(dx, dy);
+      const influence = Math.exp(
+        -(distance * distance) / (d.radius * d.radius),
+      );
+      const verticalWeight = 0.4 + t * 0.9;
+
+      offsetX +=
+        (d.vx * 2.4 + dx * 0.004) * influence * d.strength * verticalWeight;
+      offsetY +=
+        (d.vy * 2.1 + dy * 0.003) * influence * d.strength * verticalWeight;
+    }
+
+    return { x: offsetX, y: offsetY };
+  }
+
+  function drawBeam(x, angle, width, alpha) {
+    ctx.save();
+    ctx.translate(state.width * x, -state.height * 0.06);
+    ctx.rotate(angle);
+    const grad = ctx.createLinearGradient(0, 0, 0, state.height * 0.7);
+    grad.addColorStop(0, `rgba(255, 186, 96, ${alpha})`);
+    grad.addColorStop(0.16, `rgba(255, 176, 88, ${alpha * 0.72})`);
+    grad.addColorStop(0.42, `rgba(255, 156, 72, ${alpha * 0.18})`);
+    grad.addColorStop(1, "rgba(255, 156, 72, 0)");
+    ctx.fillStyle = grad;
+    ctx.fillRect(-width * 0.5, 0, width, state.height * 0.74);
+    ctx.restore();
   }
 
   function drawBackdrop() {
     const fill = ctx.createLinearGradient(0, 0, 0, state.height);
-    fill.addColorStop(0, "#010101");
-    fill.addColorStop(0.55, "#040404");
-    fill.addColorStop(1, "#020202");
+    fill.addColorStop(0, "#130406");
+    fill.addColorStop(0.24, "#180709");
+    fill.addColorStop(0.56, "#130507");
+    fill.addColorStop(1, "#070202");
     ctx.fillStyle = fill;
     ctx.fillRect(0, 0, state.width, state.height);
 
     ctx.save();
     ctx.globalCompositeOperation = "screen";
 
-    const redBed = ctx.createRadialGradient(
-      state.width * (0.5 + state.motion.swayX * 0.02),
-      state.height * 0.88,
+    const redField = ctx.createRadialGradient(
+      state.width * 0.5,
+      state.height * 0.95,
       0,
       state.width * 0.5,
-      state.height * 0.88,
-      Math.max(state.width, state.height) * 0.3,
+      state.height * 0.95,
+      Math.max(state.width, state.height) * 0.78,
     );
-    redBed.addColorStop(0, "rgba(112, 6, 22, 0.28)");
-    redBed.addColorStop(0.24, "rgba(101, 8, 20, 0.2)");
-    redBed.addColorStop(0.55, "rgba(62, 5, 12, 0.08)");
-    redBed.addColorStop(1, "rgba(0,0,0,0)");
-    ctx.fillStyle = redBed;
+    redField.addColorStop(0, "rgba(136, 12, 26, 0.32)");
+    redField.addColorStop(0.18, "rgba(126, 11, 24, 0.26)");
+    redField.addColorStop(0.42, "rgba(88, 8, 18, 0.1)");
+    redField.addColorStop(0.68, "rgba(34, 3, 8, 0.03)");
+    redField.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = redField;
     ctx.fillRect(0, 0, state.width, state.height);
 
-    const ember = ctx.createRadialGradient(
-      state.width * (0.52 + state.motion.swayX * 0.018),
-      state.height * 0.9,
+    const emberField = ctx.createRadialGradient(
+      state.width * (0.5 + state.motion.swayX * 0.008),
+      state.height * 0.965,
       0,
-      state.width * 0.52,
-      state.height * 0.9,
-      Math.max(state.width, state.height) * 0.16,
+      state.width * 0.5,
+      state.height * 0.965,
+      Math.max(state.width, state.height) * 0.22,
     );
-    ember.addColorStop(
+    emberField.addColorStop(
       0,
-      `rgba(255, 170, 88, ${0.16 + state.motion.emberPulse * 0.06})`,
+      `rgba(166, 18, 34, ${0.86 + state.motion.emberPulse * 0.08})`,
     );
-    ember.addColorStop(
-      0.24,
-      `rgba(255, 140, 64, ${0.08 + state.motion.emberPulse * 0.04})`,
+    emberField.addColorStop(
+      0.16,
+      `rgba(152, 16, 31, ${0.66 + state.motion.emberPulse * 0.06})`,
     );
-    ember.addColorStop(1, "rgba(0,0,0,0)");
-    ctx.fillStyle = ember;
+    emberField.addColorStop(0.34, "rgba(128, 12, 25, 0.28)");
+    emberField.addColorStop(0.56, "rgba(88, 8, 18, 0.08)");
+    emberField.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = emberField;
     ctx.fillRect(0, 0, state.width, state.height);
+
+    const emberCore = ctx.createRadialGradient(
+      state.width * 0.5,
+      state.height * 0.972,
+      0,
+      state.width * 0.5,
+      state.height * 0.972,
+      Math.max(state.width, state.height) * 0.075,
+    );
+    emberCore.addColorStop(
+      0,
+      `rgba(178, 22, 40, ${0.92 + state.motion.emberPulse * 0.06})`,
+    );
+    emberCore.addColorStop(0.42, "rgba(160, 18, 34, 0.46)");
+    emberCore.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = emberCore;
+    ctx.fillRect(0, 0, state.width, state.height);
+
+    const topOrange = ctx.createRadialGradient(
+      state.width * (0.54 + state.motion.swayX * 0.016),
+      -state.height * 0.14,
+      0,
+      state.width * 0.54,
+      -state.height * 0.14,
+      Math.max(state.width, state.height) * 0.72,
+    );
+    topOrange.addColorStop(
+      0,
+      `rgba(255, 188, 96, ${0.56 + state.motion.topGlow * 0.1})`,
+    );
+    topOrange.addColorStop(
+      0.14,
+      `rgba(255, 176, 86, ${0.38 + state.motion.topGlow * 0.08})`,
+    );
+    topOrange.addColorStop(0.32, "rgba(255, 160, 74, 0.18)");
+    topOrange.addColorStop(0.54, "rgba(255, 146, 64, 0.06)");
+    topOrange.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = topOrange;
+    ctx.fillRect(0, 0, state.width, state.height * 0.74);
+
+    drawBeam(
+      0.46,
+      -0.09,
+      state.width * 0.16,
+      0.22 + state.motion.topGlow * 0.04,
+    );
+    drawBeam(
+      0.56,
+      0.08,
+      state.width * 0.16,
+      0.24 + state.motion.topGlow * 0.05,
+    );
+    drawBeam(
+      0.5,
+      -0.01,
+      state.width * 0.24,
+      0.14 + state.motion.topGlow * 0.04,
+    );
 
     ctx.restore();
   }
@@ -360,136 +533,119 @@
     const y = lerp(startY, endY, t);
 
     const curveA =
-      Math.sin(state.time * 0.52 + spec.phase + t * 5.4) *
+      Math.sin(state.time * 0.5 + spec.phase + t * 4.6) *
       state.width *
       spec.sway *
-      (0.32 + rise * 0.9);
+      (0.42 + rise * 0.9);
 
     const curveB =
-      Math.cos(state.time * 0.34 + spec.phase * 1.3 + t * 8.2) *
+      Math.cos(state.time * 0.32 + spec.phase * 1.3 + t * 7.2) *
       state.width *
       spec.sway *
-      0.35 *
+      0.42 *
       rise;
 
+    const curveC =
+      Math.sin(state.time * 0.18 + spec.phase * 0.8 + t * 10.4) *
+      state.width *
+      spec.sway *
+      0.16 *
+      (0.4 + t);
+
     const verticalShear =
-      (t - 0.5) * state.motion.swayX * state.width * 0.08 +
-      state.motion.dragDriftX * (0.04 + t * 0.002);
+      (t - 0.5) * state.motion.swayX * state.width * 0.09 +
+      state.motion.dragDriftX * (0.025 + t * 0.0015);
+
+    const disturbance = disturbanceOffset(baseX, y, t);
 
     const x =
       baseX +
       curveA +
       curveB +
+      curveC +
       verticalShear +
-      spec.tilt * state.width * t * 0.18;
+      disturbance.x +
+      spec.tilt * state.width * t * 0.2;
 
-    return { x, y };
+    return {
+      x,
+      y: y + disturbance.y + state.motion.dragDriftY * (0.01 + t * 0.001),
+    };
   }
 
-  function drawSmokePlume(spec) {
-    const steps = 42;
-    const points = [];
-
-    for (let i = 0; i <= steps; i += 1) {
-      const t = i / steps;
-      points.push(plumePoint(spec, t));
-    }
-
+  function drawSmokeMass(spec) {
     ctx.save();
     ctx.globalCompositeOperation = "screen";
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
 
-    const hazeAlpha = 0.035 * spec.brightness + state.motion.smokeLift * 0.004;
-    const coreAlpha = 0.12 * spec.brightness + state.motion.smokeLift * 0.008;
-    const brightAlpha = 0.18 * spec.brightness + state.motion.smokeLift * 0.012;
+    const count = 34;
+    for (let i = 0; i < count; i += 1) {
+      const t = i / (count - 1);
+      const p = plumePoint(spec, t);
 
-    ctx.shadowColor = "rgba(255,255,255,0.16)";
-    ctx.shadowBlur = 22 + spec.brightness * 8;
+      const spread =
+        state.width * lerp(spec.startWidth, spec.endWidth, Math.pow(t, 1.85));
+      const alpha =
+        (0.038 + t * 0.034) * spec.brightness + state.motion.smokeLift * 0.008;
 
-    ctx.strokeStyle = `rgba(255,255,255,${hazeAlpha})`;
-    ctx.lineWidth = Math.max(
-      8,
-      state.width * spec.width * (1.4 + state.motion.smokeLift * 0.08),
-    );
+      const main = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, spread);
+      main.addColorStop(0, `rgba(255,255,255,${alpha})`);
+      main.addColorStop(0.24, `rgba(255,255,255,${alpha * 0.56})`);
+      main.addColorStop(0.58, `rgba(255,255,255,${alpha * 0.18})`);
+      main.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.fillStyle = main;
+      ctx.fillRect(p.x - spread, p.y - spread, spread * 2, spread * 2);
 
-    ctx.beginPath();
-    ctx.moveTo(points[0].x, points[0].y);
-    for (let i = 1; i < points.length; i += 1) {
-      const prev = points[i - 1];
-      const curr = points[i];
-      ctx.quadraticCurveTo(
-        prev.x,
-        prev.y,
-        (prev.x + curr.x) * 0.5,
-        (prev.y + curr.y) * 0.5,
-      );
+      for (let k = 0; k < 4; k += 1) {
+        const orbit = spread * (0.14 + t * 0.34);
+        const angle = state.time * 0.18 + spec.phase + i * 0.22 + k * 1.52;
+        const ox = Math.cos(angle) * orbit;
+        const oy = Math.sin(angle * 1.16) * orbit * 0.42;
+        const puffRadius = spread * (0.42 + k * 0.08);
+
+        const puff = ctx.createRadialGradient(
+          p.x + ox,
+          p.y + oy,
+          0,
+          p.x + ox,
+          p.y + oy,
+          puffRadius,
+        );
+        puff.addColorStop(0, `rgba(255,255,255,${alpha * 0.6})`);
+        puff.addColorStop(0.3, `rgba(255,255,255,${alpha * 0.26})`);
+        puff.addColorStop(0.76, "rgba(255,255,255,0.012)");
+        puff.addColorStop(1, "rgba(255,255,255,0)");
+        ctx.fillStyle = puff;
+        ctx.fillRect(
+          p.x + ox - puffRadius,
+          p.y + oy - puffRadius,
+          puffRadius * 2,
+          puffRadius * 2,
+        );
+      }
     }
-    ctx.stroke();
-
-    ctx.shadowBlur = 12 + spec.brightness * 5;
-    ctx.strokeStyle = `rgba(255,255,255,${coreAlpha})`;
-    ctx.lineWidth = Math.max(
-      3,
-      state.width * spec.width * (0.74 + state.motion.smokeLift * 0.04),
-    );
-
-    ctx.beginPath();
-    ctx.moveTo(points[0].x, points[0].y);
-    for (let i = 1; i < points.length; i += 1) {
-      const prev = points[i - 1];
-      const curr = points[i];
-      ctx.quadraticCurveTo(
-        prev.x,
-        prev.y,
-        (prev.x + curr.x) * 0.5,
-        (prev.y + curr.y) * 0.5,
-      );
-    }
-    ctx.stroke();
-
-    ctx.shadowBlur = 0;
-    ctx.strokeStyle = `rgba(255,255,255,${brightAlpha})`;
-    ctx.lineWidth = Math.max(1.2, state.width * spec.width * 0.18);
-
-    ctx.beginPath();
-    const highlightStart = Math.floor(points.length * 0.12);
-    ctx.moveTo(points[highlightStart].x, points[highlightStart].y);
-    for (let i = highlightStart + 1; i < points.length; i += 1) {
-      const prev = points[i - 1];
-      const curr = points[i];
-      ctx.quadraticCurveTo(
-        prev.x,
-        prev.y,
-        (prev.x + curr.x) * 0.5,
-        (prev.y + curr.y) * 0.5,
-      );
-    }
-    ctx.stroke();
 
     ctx.restore();
   }
 
-  function drawSmokeVeils() {
+  function drawDisturbanceVeils() {
     ctx.save();
     ctx.globalCompositeOperation = "screen";
 
-    for (let i = 0; i < 5; i += 1) {
-      const x =
-        state.width *
-          (0.45 + i * 0.03 + Math.sin(state.time * 0.22 + i) * 0.012) +
-        state.motion.swayX * state.width * 0.02;
-      const y =
-        state.height * (0.22 + i * 0.11) + state.motion.dragDriftY * 0.08;
-      const radius = state.width * (0.09 + i * 0.016);
-
-      const veil = ctx.createRadialGradient(x, y, 0, x, y, radius);
-      veil.addColorStop(0, "rgba(255,255,255,0.08)");
-      veil.addColorStop(0.32, "rgba(255,255,255,0.04)");
-      veil.addColorStop(0.68, "rgba(255,255,255,0.012)");
+    for (const d of state.disturbances) {
+      const veil = ctx.createRadialGradient(
+        d.x,
+        d.y,
+        0,
+        d.x,
+        d.y,
+        d.radius * 0.9,
+      );
+      veil.addColorStop(0, `rgba(255,255,255,${0.06 * d.life})`);
+      veil.addColorStop(0.22, `rgba(255,255,255,${0.03 * d.life})`);
+      veil.addColorStop(0.55, `rgba(255,255,255,${0.012 * d.life})`);
       veil.addColorStop(1, "rgba(255,255,255,0)");
       ctx.fillStyle = veil;
-      ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+      ctx.fillRect(d.x - d.radius, d.y - d.radius, d.radius * 2, d.radius * 2);
     }
 
     ctx.restore();
@@ -501,14 +657,14 @@
 
     const base = ctx.createRadialGradient(
       state.width * 0.5,
-      state.height * 0.88,
+      state.height * 0.95,
       0,
       state.width * 0.5,
-      state.height * 0.88,
-      state.width * 0.18,
+      state.height * 0.95,
+      state.width * 0.16,
     );
     base.addColorStop(0, "rgba(255,255,255,0.08)");
-    base.addColorStop(0.34, "rgba(255,255,255,0.03)");
+    base.addColorStop(0.28, "rgba(255,255,255,0.03)");
     base.addColorStop(1, "rgba(255,255,255,0)");
     ctx.fillStyle = base;
     ctx.fillRect(0, 0, state.width, state.height);
@@ -521,16 +677,16 @@
     ctx.globalCompositeOperation = "screen";
 
     const glaze = ctx.createLinearGradient(
-      state.width * (0.38 + state.motion.swayX * 0.02),
+      state.width * (0.28 + state.motion.swayX * 0.02),
       0,
-      state.width * (0.68 + state.motion.swayX * 0.02),
+      state.width * (0.72 + state.motion.swayX * 0.02),
       state.height,
     );
     glaze.addColorStop(0, "rgba(255,255,255,0)");
-    glaze.addColorStop(0.22, "rgba(255,255,255,0.02)");
-    glaze.addColorStop(0.42, "rgba(255,255,255,0.06)");
-    glaze.addColorStop(0.58, "rgba(255,162,84,0.03)");
-    glaze.addColorStop(0.74, "rgba(255,255,255,0.014)");
+    glaze.addColorStop(0.14, "rgba(255,255,255,0.03)");
+    glaze.addColorStop(0.34, "rgba(255,255,255,0.08)");
+    glaze.addColorStop(0.56, "rgba(255,170,92,0.06)");
+    glaze.addColorStop(0.74, "rgba(255,255,255,0.024)");
     glaze.addColorStop(1, "rgba(255,255,255,0)");
     ctx.fillStyle = glaze;
     ctx.fillRect(0, 0, state.width, state.height);
@@ -543,8 +699,8 @@
 
     drawBackdrop();
     drawSmokeBase();
-    plumes.forEach(drawSmokePlume);
-    drawSmokeVeils();
+    plumes.forEach(drawSmokeMass);
+    drawDisturbanceVeils();
     drawFinalHaze();
   }
 

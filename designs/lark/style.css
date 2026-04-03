@@ -1,6 +1,6 @@
 :root {
   color-scheme: dark;
-  --scene-bg: #020202;
+  --scene-bg: #090305;
 }
 
 * {
@@ -41,17 +41,21 @@ body {
   touch-action: none;
   overscroll-behavior: none;
   background:
+    radial-gradient(circle at 50% 95%, rgba(163, 14, 31, 0.5), transparent 22%),
+    radial-gradient(circle at 50% 82%, rgba(112, 10, 22, 0.2), transparent 34%),
     radial-gradient(
-      circle at 50% 84%,
-      rgba(129, 10, 22, 0.22),
-      transparent 26%
+      circle at 54% 8%,
+      rgba(255, 178, 96, 0.12),
+      transparent 28%
     ),
-    radial-gradient(
-      circle at 54% 88%,
-      rgba(255, 149, 67, 0.08),
-      transparent 16%
-    ),
-    linear-gradient(180deg, #010101 0%, #040404 100%);
+    linear-gradient(
+      180deg,
+      #150507 0%,
+      #170709 22%,
+      #150608 52%,
+      #0d0304 78%,
+      #060202 100%
+    );
 }
 
 #lark-canvas {
@@ -70,14 +74,14 @@ body {
   inset: 0;
   background:
     radial-gradient(
-      circle at 50% 48%,
-      transparent 22%,
-      rgba(0, 0, 0, 0.12) 60%,
-      rgba(0, 0, 0, 0.55) 100%
+      circle at 50% 44%,
+      transparent 16%,
+      rgba(0, 0, 0, 0.08) 56%,
+      rgba(0, 0, 0, 0.46) 100%
     ),
     linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.02),
+      rgba(255, 255, 255, 0.014),
       transparent 12%,
       transparent 88%,
       rgba(0, 0, 0, 0.18)
@@ -88,7 +92,7 @@ body {
 .scene-grain {
   position: absolute;
   inset: 0;
-  opacity: 0.032;
+  opacity: 0.026;
   background-image: radial-gradient(
     circle at 1px 1px,
     rgba(255, 255, 255, 0.82) 0.52px,
@@ -101,17 +105,17 @@ body {
 .hidden-ju {
   position: absolute;
   left: 50%;
-  top: 56%;
+  top: 55%;
   transform: translate(-50%, -50%) rotate(-8deg);
-  color: rgba(255, 248, 242, 0.12);
-  font-size: clamp(18px, 5vw, 30px);
+  color: rgba(255, 247, 240, 0.12);
+  font-size: clamp(20px, 5.6vw, 36px);
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: lowercase;
   user-select: none;
   text-shadow:
-    0 0 10px rgba(255, 255, 255, 0.08),
-    0 0 18px rgba(255, 170, 92, 0.06);
+    0 0 12px rgba(255, 255, 255, 0.08),
+    0 0 26px rgba(255, 162, 84, 0.07);
 }
 
 .motion-permission-button {
@@ -123,7 +127,7 @@ body {
   padding: 7px 10px;
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 999px;
-  background: rgba(10, 10, 10, 0.34);
+  background: rgba(18, 8, 8, 0.34);
   color: rgba(245, 249, 255, 0.76);
   font-size: 10px;
   font-weight: 700;
