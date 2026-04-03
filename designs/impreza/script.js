@@ -58,44 +58,52 @@
     {
       y: 0.16,
       thickness: 0.31,
-      camber: -0.045,
-      slope: -0.12,
-      twist: 0.05,
+      camber: -0.05,
+      slope: -0.13,
+      twist: 0.055,
       depth: 0.14,
       fine: 0.006,
+      breakA: -0.006,
+      breakB: 0.008,
       phase: 0.2,
       colors: ["#071a33", "#0b3b78", "#0f57ae", "#63b8ff", "#0b2a56"],
     },
     {
       y: 0.36,
       thickness: 0.23,
-      camber: -0.018,
-      slope: -0.035,
-      twist: 0.08,
+      camber: -0.02,
+      slope: -0.04,
+      twist: 0.085,
       depth: 0.34,
       fine: 0.005,
+      breakA: -0.004,
+      breakB: 0.006,
       phase: 1.1,
       colors: ["#071b35", "#0d488f", "#1763c0", "#9ad8ff", "#0c3365"],
     },
     {
       y: 0.56,
       thickness: 0.34,
-      camber: 0.028,
-      slope: 0.03,
-      twist: 0.11,
+      camber: 0.03,
+      slope: 0.032,
+      twist: 0.12,
       depth: 0.58,
       fine: 0.007,
+      breakA: -0.007,
+      breakB: 0.01,
       phase: 2.1,
       colors: ["#081c36", "#0c4da0", "#1b6dd0", "#b2e0ff", "#0c3b79"],
     },
     {
       y: 0.78,
       thickness: 0.22,
-      camber: 0.05,
-      slope: 0.09,
-      twist: 0.06,
+      camber: 0.052,
+      slope: 0.095,
+      twist: 0.068,
       depth: 0.84,
       fine: 0.005,
+      breakA: -0.003,
+      breakB: 0.006,
       phase: 3.0,
       colors: ["#06182f", "#093a74", "#1156ac", "#6ab8ff", "#0a2c58"],
     },
@@ -111,7 +119,7 @@
       width: 13,
       alpha: 0.26,
       warm: false,
-      slant: -0.02,
+      slant: -0.015,
     },
     {
       y: 0.49,
@@ -122,7 +130,7 @@
       width: 16,
       alpha: 0.3,
       warm: false,
-      slant: 0.02,
+      slant: 0.014,
     },
     {
       y: 0.66,
@@ -133,21 +141,34 @@
       width: 10,
       alpha: 0.12,
       warm: true,
-      slant: 0.05,
+      slant: 0.032,
     },
   ];
 
   const streakLayers = [
-    { count: 10, alpha: 0.06, width: 1.2, speed: 220, slant: -0.08, jitter: 8 },
-    { count: 8, alpha: 0.04, width: 1.4, speed: 180, slant: 0.06, jitter: 11 },
     {
-      count: 6,
-      alpha: 0.028,
-      width: 1.8,
-      speed: 140,
-      slant: -0.15,
-      jitter: 14,
+      count: 28,
+      alpha: 0.085,
+      width: 1.4,
+      speed: 250,
+      slant: -0.01,
+      jitter: 5,
     },
+    { count: 24, alpha: 0.06, width: 1.3, speed: 205, slant: 0.018, jitter: 7 },
+    {
+      count: 18,
+      alpha: 0.045,
+      width: 1.5,
+      speed: 168,
+      slant: -0.05,
+      jitter: 10,
+    },
+  ];
+
+  const airLayers = [
+    { y: 0.24, width: 0.42, alpha: 0.05, speed: 70, slant: -0.02 },
+    { y: 0.52, width: 0.5, alpha: 0.06, speed: 56, slant: 0.012 },
+    { y: 0.76, width: 0.36, alpha: 0.04, speed: 62, slant: -0.04 },
   ];
 
   function resize() {
@@ -474,8 +495,12 @@
         Math.pow(p - 0.5, 2) * state.height * spec.camber +
         (p - 0.5) * state.height * spec.slope;
 
+      const facetCurve =
+        Math.tanh((p - 0.3) * 12) * state.height * spec.breakA +
+        Math.tanh((p - 0.64) * 14) * state.height * spec.breakB;
+
       const fineCurve =
-        Math.sin(p * Math.PI * 1.4 + state.time * 0.06 + spec.phase) *
+        Math.sin(p * Math.PI * 1.4 + state.time * 0.12 + spec.phase) *
         state.height *
         spec.fine;
 
@@ -486,6 +511,7 @@
       const centerY =
         state.height * spec.y +
         broadCurve +
+        facetCurve +
         fineCurve +
         state.motion.shiftY * (0.08 + spec.depth * 0.08) +
         state.motion.surfaceTiltX * state.height * (0.08 + spec.depth * 0.05) +
@@ -560,15 +586,16 @@
 
   function drawBodyPanel(spec, index) {
     const { topPoints, bottomPoints } = createBodyPanelPath(spec);
+    const shimmer = Math.sin(state.time * 0.34 + spec.phase) * 0.04;
 
     ctx.save();
     fillPathFromPoints(topPoints, bottomPoints);
     ctx.clip();
 
     const fill = ctx.createLinearGradient(
-      -state.width * 0.08 + state.motion.shiftX * 0.14,
+      -state.width * 0.08 + state.motion.shiftX * 0.14 + shimmer * state.width,
       state.height * (spec.y - 0.18),
-      state.width * 1.08 + state.motion.shiftX * 0.14,
+      state.width * 1.08 + state.motion.shiftX * 0.14 + shimmer * state.width,
       state.height * (spec.y + 0.22),
     );
     fill.addColorStop(0, spec.colors[0]);
@@ -587,16 +614,16 @@
     ctx.globalCompositeOperation = "screen";
 
     const broadFace = ctx.createLinearGradient(
-      state.width * (-0.04 + state.motion.surfaceTiltY * 0.02),
+      state.width * (-0.04 + state.motion.surfaceTiltY * 0.02 + shimmer * 0.4),
       0,
-      state.width * (1.02 + state.motion.surfaceTiltY * 0.03),
+      state.width * (1.02 + state.motion.surfaceTiltY * 0.03 + shimmer * 0.6),
       state.height,
     );
     broadFace.addColorStop(0, "rgba(255,255,255,0)");
-    broadFace.addColorStop(0.22, "rgba(255,255,255,0.028)");
-    broadFace.addColorStop(0.38, "rgba(183,227,255,0.1)");
-    broadFace.addColorStop(0.56, "rgba(255,255,255,0.05)");
-    broadFace.addColorStop(0.72, "rgba(78, 187, 255, 0.1)");
+    broadFace.addColorStop(0.22, "rgba(255,255,255,0.03)");
+    broadFace.addColorStop(0.38, "rgba(183,227,255,0.12)");
+    broadFace.addColorStop(0.56, "rgba(255,255,255,0.06)");
+    broadFace.addColorStop(0.72, "rgba(78, 187, 255, 0.11)");
     broadFace.addColorStop(0.9, "rgba(255,255,255,0.02)");
     broadFace.addColorStop(1, "rgba(255,255,255,0)");
     ctx.fillStyle = broadFace;
@@ -608,16 +635,24 @@
     );
 
     const hardPlane = ctx.createLinearGradient(
-      state.width * (0.08 + index * 0.08 + state.motion.surfaceTiltY * 0.026),
+      state.width *
+        (0.06 +
+          index * 0.08 +
+          state.motion.surfaceTiltY * 0.028 +
+          shimmer * 0.6),
       0,
-      state.width * (0.4 + index * 0.09 + state.motion.surfaceTiltY * 0.038),
+      state.width *
+        (0.34 +
+          index * 0.09 +
+          state.motion.surfaceTiltY * 0.04 +
+          shimmer * 0.8),
       state.height,
     );
     hardPlane.addColorStop(0, "rgba(255,255,255,0)");
-    hardPlane.addColorStop(0.24, "rgba(255,255,255,0.05)");
-    hardPlane.addColorStop(0.38, "rgba(255,255,255,0.34)");
-    hardPlane.addColorStop(0.44, "rgba(171,225,255,0.12)");
-    hardPlane.addColorStop(0.54, "rgba(255,255,255,0.02)");
+    hardPlane.addColorStop(0.2, "rgba(255,255,255,0.06)");
+    hardPlane.addColorStop(0.34, "rgba(255,255,255,0.44)");
+    hardPlane.addColorStop(0.42, "rgba(171,225,255,0.16)");
+    hardPlane.addColorStop(0.5, "rgba(255,255,255,0.03)");
     hardPlane.addColorStop(1, "rgba(255,255,255,0)");
     ctx.fillStyle = hardPlane;
     ctx.fillRect(
@@ -625,6 +660,45 @@
       -state.height * 0.14,
       state.width * 1.48,
       state.height * 1.28,
+    );
+
+    const facetShadow = ctx.createLinearGradient(
+      state.width * (0.32 + index * 0.08),
+      0,
+      state.width * (0.58 + index * 0.08),
+      state.height,
+    );
+    facetShadow.addColorStop(0, "rgba(0,0,0,0)");
+    facetShadow.addColorStop(0.34, "rgba(0,0,0,0.02)");
+    facetShadow.addColorStop(0.46, "rgba(0,0,0,0.12)");
+    facetShadow.addColorStop(0.58, "rgba(0,0,0,0.04)");
+    facetShadow.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = facetShadow;
+    ctx.fillRect(
+      -state.width * 0.12,
+      -state.height * 0.14,
+      state.width * 1.42,
+      state.height * 1.24,
+    );
+
+    const facetHighlight = ctx.createLinearGradient(
+      state.width * (0.48 + index * 0.06 + shimmer * 0.4),
+      0,
+      state.width * (0.72 + index * 0.06 + shimmer * 0.55),
+      state.height,
+    );
+    facetHighlight.addColorStop(0, "rgba(255,255,255,0)");
+    facetHighlight.addColorStop(0.28, "rgba(255,255,255,0.02)");
+    facetHighlight.addColorStop(0.42, "rgba(255,255,255,0.22)");
+    facetHighlight.addColorStop(0.5, "rgba(176,226,255,0.08)");
+    facetHighlight.addColorStop(0.58, "rgba(255,255,255,0.015)");
+    facetHighlight.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = facetHighlight;
+    ctx.fillRect(
+      -state.width * 0.12,
+      -state.height * 0.14,
+      state.width * 1.42,
+      state.height * 1.24,
     );
 
     const lowerShadow = ctx.createLinearGradient(0, 0, 0, state.height);
@@ -639,8 +713,8 @@
 
     ctx.save();
     ctx.globalCompositeOperation = "screen";
-    ctx.strokeStyle = "rgba(235, 246, 255, 0.16)";
-    ctx.lineWidth = Math.max(1, Math.min(state.width, state.height) * 0.0026);
+    ctx.strokeStyle = "rgba(235, 246, 255, 0.17)";
+    ctx.lineWidth = Math.max(1, Math.min(state.width, state.height) * 0.0027);
 
     ctx.beginPath();
     ctx.moveTo(topPoints[0].x, topPoints[0].y);
@@ -697,8 +771,8 @@
         const slant =
           state.height *
           (layer.slant +
-            state.motion.speedY * 0.05 +
-            state.motion.surfaceTiltY * 0.02);
+            state.motion.speedY * 0.03 +
+            state.motion.surfaceTiltY * 0.01);
 
         const gradient = ctx.createLinearGradient(
           startX,
@@ -707,10 +781,10 @@
           baseY + slant,
         );
         gradient.addColorStop(0, "rgba(255,255,255,0)");
-        gradient.addColorStop(0.22, "rgba(255,255,255,0.012)");
-        gradient.addColorStop(0.44, `rgba(165, 227, 255, ${layer.alpha})`);
-        gradient.addColorStop(0.68, `rgba(255,255,255,${layer.alpha * 1.9})`);
-        gradient.addColorStop(0.86, `rgba(92, 197, 255, ${layer.alpha * 0.8})`);
+        gradient.addColorStop(0.18, "rgba(255,255,255,0.018)");
+        gradient.addColorStop(0.42, `rgba(165, 227, 255, ${layer.alpha})`);
+        gradient.addColorStop(0.68, `rgba(255,255,255,${layer.alpha * 2.1})`);
+        gradient.addColorStop(0.88, `rgba(92, 197, 255, ${layer.alpha * 0.9})`);
         gradient.addColorStop(1, "rgba(255,255,255,0)");
 
         ctx.strokeStyle = gradient;
@@ -720,6 +794,42 @@
         ctx.lineTo(startX + length, baseY + slant);
         ctx.stroke();
       }
+    });
+
+    ctx.restore();
+  }
+
+  function drawAirSheen() {
+    ctx.save();
+    ctx.globalCompositeOperation = "screen";
+
+    airLayers.forEach((layer, index) => {
+      const x =
+        ((state.time * layer.speed + state.motion.speedX * 160 + index * 220) %
+          (state.width * 1.7)) -
+        state.width * 0.35;
+      const y =
+        state.height * layer.y +
+        state.motion.surfaceTiltX * 10 +
+        Math.sin(state.time * 0.22 + index) * 8;
+
+      const w = state.width * layer.width;
+      const h = state.height * 0.18;
+
+      const grad = ctx.createLinearGradient(
+        x,
+        y,
+        x + w,
+        y + state.height * layer.slant,
+      );
+      grad.addColorStop(0, "rgba(255,255,255,0)");
+      grad.addColorStop(0.2, `rgba(200, 236, 255, ${layer.alpha * 0.42})`);
+      grad.addColorStop(0.42, `rgba(255,255,255,${layer.alpha})`);
+      grad.addColorStop(0.7, `rgba(141, 214, 255, ${layer.alpha * 0.55})`);
+      grad.addColorStop(1, "rgba(255,255,255,0)");
+
+      ctx.fillStyle = grad;
+      ctx.fillRect(x, y - h * 0.5, w, h);
     });
 
     ctx.restore();
@@ -893,6 +1003,7 @@
     drawBackdrop();
     bodyPanels.forEach(drawBodyPanel);
     drawSpeedField();
+    drawAirSheen();
     ridgeSpecs.forEach(drawRidge);
     drawFineMetal();
     drawFlares();
