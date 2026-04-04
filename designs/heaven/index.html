@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1"
+    />
+    <title>Heaven / waterfall-for-juju-2026</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main
+      class="heaven-scene"
+      aria-label="Heaven gradient design with Taiju typography"
+    >
+      <canvas id="heaven-canvas" aria-hidden="true"></canvas>
+
+      <div class="heaven-overlay" aria-hidden="true">
+        <div class="scene-vignette"></div>
+        <div class="scene-grain"></div>
+
+        <div class="title-wrap">
+          <div class="title-backdrop"></div>
+          <div class="title-mark" data-text="Taiju">Taiju</div>
+        </div>
+      </div>
+
+      <button
+        id="motion-permission-button"
+        class="motion-permission-button"
+        type="button"
+        aria-label="Enable tilt motion"
+      >
+        tilt
+      </button>
+    </main>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
