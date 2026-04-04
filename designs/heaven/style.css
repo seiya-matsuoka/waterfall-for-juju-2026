@@ -129,7 +129,7 @@ body {
   font-family: "Arial Black", "Helvetica Neue", Arial, sans-serif;
   font-size: clamp(72px, 24vw, 150px);
   font-weight: 900;
-  font-style: italic;
+  font-style: normal;
   line-height: 0.92;
   letter-spacing: -0.018em;
   -webkit-text-stroke: 1.6px rgba(246, 251, 255, 0.46);
@@ -137,8 +137,6 @@ body {
     0 0 1px rgba(255, 255, 255, 0.2),
     0 4px 10px rgba(84, 126, 195, 0.08),
     0 10px 24px rgba(0, 0, 0, 0.08);
-  transform: scaleX(1.06) skewX(-8deg);
-  transform-origin: center;
   mix-blend-mode: screen;
 }
 

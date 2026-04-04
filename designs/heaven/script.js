@@ -14,6 +14,7 @@
     time: 0,
     lastFrame: performance.now(),
     noiseCanvas: null,
+    glints: [],
     pointer: {
       active: false,
       id: null,
@@ -75,12 +76,36 @@
     return { x: event.clientX, y: event.clientY };
   }
 
+  function addGlint(x, y, dx, dy, strength = 1) {
+    const speed = Math.hypot(dx, dy);
+    const spread = Math.min(1.5, 0.42 + strength * 0.34 + speed / 46);
+
+    state.glints.push({
+      x,
+      y,
+      dx,
+      dy,
+      angle: Math.atan2(dy, dx || 0.0001),
+      radius: 54 + Math.min(44, speed * 1.15),
+      airRadius: 86 + Math.min(72, speed * 1.7),
+      length: 62 + Math.min(72, speed * 1.5),
+      strength: Math.min(1.35, spread),
+      life: 1,
+    });
+
+    if (state.glints.length > 20) {
+      state.glints.shift();
+    }
+  }
+
   function onPointerDown(event) {
     const point = getPoint(event);
     state.pointer.active = true;
     state.pointer.id = event.pointerId ?? null;
     state.pointer.lastX = point.x;
     state.pointer.lastY = point.y;
+
+    addGlint(point.x, point.y, 0, 0, 0.55);
 
     if (event.pointerId != null && canvas.setPointerCapture) {
       try {
@@ -111,6 +136,7 @@
 
     const dxNorm = dx / Math.max(1, state.width);
     const dyNorm = dy / Math.max(1, state.height);
+    const speed = Math.min(1.4, Math.hypot(dx, dy) / 32);
 
     state.motion.targetShiftX = clamp(
       state.motion.targetShiftX + dxNorm * 1.7,
@@ -127,6 +153,10 @@
       -1,
       1,
     );
+
+    if (Math.hypot(dx, dy) > 2.5) {
+      addGlint(point.x, point.y, dx, dy, speed);
+    }
   }
 
   function onPointerUp(event) {
@@ -192,6 +222,22 @@
     }
   }
 
+  function updateGlints(deltaSeconds) {
+    for (let i = state.glints.length - 1; i >= 0; i -= 1) {
+      const glint = state.glints[i];
+      glint.x += glint.dx * 0.14;
+      glint.y += glint.dy * 0.14;
+      glint.dx *= decay(0.93, deltaSeconds);
+      glint.dy *= decay(0.93, deltaSeconds);
+      glint.life *= decay(0.89, deltaSeconds);
+      glint.strength *= decay(0.945, deltaSeconds);
+
+      if (glint.life < 0.08 || glint.strength < 0.05) {
+        state.glints.splice(i, 1);
+      }
+    }
+  }
+
   function update(deltaSeconds) {
     state.time += deltaSeconds;
 
@@ -225,6 +271,8 @@
     state.motion.shiftX = lerp(state.motion.shiftX, shiftX, 0.065);
     state.motion.shiftY = lerp(state.motion.shiftY, shiftY, 0.065);
     state.motion.angleDrift = lerp(state.motion.angleDrift, angleDrift, 0.06);
+
+    updateGlints(deltaSeconds);
   }
 
   function drawGradientField() {
@@ -322,6 +370,113 @@
     }
   }
 
+  function drawGlints() {
+    ctx.save();
+    ctx.globalCompositeOperation = "screen";
+
+    for (const glint of state.glints) {
+      const airHalo = ctx.createRadialGradient(
+        glint.x,
+        glint.y,
+        0,
+        glint.x,
+        glint.y,
+        glint.airRadius,
+      );
+      airHalo.addColorStop(
+        0,
+        `rgba(255,255,255,${0.1 * glint.life * glint.strength})`,
+      );
+      airHalo.addColorStop(
+        0.22,
+        `rgba(255,248,232,${0.07 * glint.life * glint.strength})`,
+      );
+      airHalo.addColorStop(
+        0.52,
+        `rgba(255,255,255,${0.024 * glint.life * glint.strength})`,
+      );
+      airHalo.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.fillStyle = airHalo;
+      ctx.fillRect(
+        glint.x - glint.airRadius,
+        glint.y - glint.airRadius,
+        glint.airRadius * 2,
+        glint.airRadius * 2,
+      );
+
+      const halo = ctx.createRadialGradient(
+        glint.x,
+        glint.y,
+        0,
+        glint.x,
+        glint.y,
+        glint.radius,
+      );
+      halo.addColorStop(
+        0,
+        `rgba(255,255,255,${0.2 * glint.life * glint.strength})`,
+      );
+      halo.addColorStop(
+        0.28,
+        `rgba(255,244,220,${0.12 * glint.life * glint.strength})`,
+      );
+      halo.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.fillStyle = halo;
+      ctx.fillRect(
+        glint.x - glint.radius,
+        glint.y - glint.radius,
+        glint.radius * 2,
+        glint.radius * 2,
+      );
+
+      ctx.save();
+      ctx.translate(glint.x, glint.y);
+      ctx.rotate(glint.angle);
+
+      const streak = ctx.createLinearGradient(
+        -glint.length * 0.5,
+        0,
+        glint.length * 0.5,
+        0,
+      );
+      streak.addColorStop(0, "rgba(255,255,255,0)");
+      streak.addColorStop(
+        0.18,
+        `rgba(255,255,255,${0.06 * glint.life * glint.strength})`,
+      );
+      streak.addColorStop(
+        0.5,
+        `rgba(255,246,218,${0.2 * glint.life * glint.strength})`,
+      );
+      streak.addColorStop(
+        0.82,
+        `rgba(255,255,255,${0.06 * glint.life * glint.strength})`,
+      );
+      streak.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.fillStyle = streak;
+      ctx.fillRect(-glint.length * 0.5, -4.4, glint.length, 8.8);
+
+      const softTrail = ctx.createLinearGradient(
+        -glint.length * 0.42,
+        0,
+        glint.length * 0.42,
+        0,
+      );
+      softTrail.addColorStop(0, "rgba(255,255,255,0)");
+      softTrail.addColorStop(
+        0.5,
+        `rgba(255,255,255,${0.06 * glint.life * glint.strength})`,
+      );
+      softTrail.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.fillStyle = softTrail;
+      ctx.fillRect(-glint.length * 0.42, -12, glint.length * 0.84, 24);
+
+      ctx.restore();
+    }
+
+    ctx.restore();
+  }
+
   function drawPowderTexture() {
     ctx.save();
     ctx.globalAlpha = 0.038;
@@ -340,6 +495,7 @@
 
     drawGradientField();
     drawSoftVeils();
+    drawGlints();
     drawPowderTexture();
   }
 
