@@ -1,6 +1,6 @@
 :root {
   color-scheme: dark;
-  --scene-bg: #090305;
+  --scene-bg: #060203;
 }
 
 * {
@@ -42,28 +42,16 @@ body {
   overscroll-behavior: none;
   background:
     radial-gradient(
-      circle at 50% 96%,
-      rgba(164, 16, 32, 0.56),
-      transparent 24%
+      circle at 50% 100%,
+      rgba(155, 17, 33, 0.24),
+      transparent 28%
     ),
     radial-gradient(
-      circle at 50% 82%,
-      rgba(120, 10, 24, 0.24),
-      transparent 38%
+      circle at 52% 8%,
+      rgba(255, 176, 88, 0.12),
+      transparent 30%
     ),
-    radial-gradient(
-      circle at 54% 8%,
-      rgba(255, 178, 96, 0.16),
-      transparent 34%
-    ),
-    linear-gradient(
-      180deg,
-      #170608 0%,
-      #1a070a 20%,
-      #150507 52%,
-      #0d0304 78%,
-      #060202 100%
-    );
+    linear-gradient(180deg, #080203 0%, #0a0204 28%, #090203 58%, #050102 100%);
 }
 
 #lark-canvas {
@@ -82,16 +70,16 @@ body {
   inset: 0;
   background:
     radial-gradient(
-      circle at 50% 44%,
-      transparent 14%,
+      circle at 50% 42%,
+      transparent 16%,
       rgba(0, 0, 0, 0.08) 56%,
       rgba(0, 0, 0, 0.46) 100%
     ),
     linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.012),
-      transparent 12%,
-      transparent 88%,
+      rgba(255, 255, 255, 0.01),
+      transparent 14%,
+      transparent 86%,
       rgba(0, 0, 0, 0.18)
     );
   mix-blend-mode: multiply;
@@ -100,7 +88,7 @@ body {
 .scene-grain {
   position: absolute;
   inset: 0;
-  opacity: 0.024;
+  opacity: 0.022;
   background-image: radial-gradient(
     circle at 1px 1px,
     rgba(255, 255, 255, 0.82) 0.52px,
@@ -113,17 +101,17 @@ body {
 .hidden-ju {
   position: absolute;
   left: 50%;
-  top: 55%;
-  transform: translate(-50%, -50%) rotate(-8deg);
-  color: rgba(255, 247, 240, 0.12);
-  font-size: clamp(20px, 5.6vw, 36px);
+  bottom: 13%;
+  transform: translateX(-50%);
+  color: rgba(255, 245, 238, 0.11);
+  font-size: clamp(18px, 4.8vw, 30px);
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: lowercase;
   user-select: none;
   text-shadow:
     0 0 12px rgba(255, 255, 255, 0.08),
-    0 0 26px rgba(255, 162, 84, 0.07);
+    0 0 22px rgba(255, 160, 82, 0.06);
 }
 
 .motion-permission-button {
