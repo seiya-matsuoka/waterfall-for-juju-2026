@@ -13,9 +13,10 @@
     deepRed: [148, 18, 28],
     white: [242, 236, 230],
     warmWhite: [255, 247, 238],
-    orange: [255, 124, 16],
-    hotOrange: [255, 146, 18],
-    vividOrange: [255, 136, 10],
+    orange: [255, 126, 10],
+    hotOrange: [255, 148, 16],
+    vividOrange: [255, 136, 0],
+    softOrange: [255, 176, 86],
   };
 
   const state = {
@@ -79,7 +80,7 @@
     if (y > 0.56) {
       const t = (0.8 - y) / 0.24;
       return mixColor(
-        mixColor(COLORS.red, COLORS.warmWhite, 0.06),
+        mixColor(COLORS.red, COLORS.warmWhite, 0.08),
         mixColor(COLORS.red, COLORS.warmWhite, 0.34),
         clamp(t, 0, 1),
       );
@@ -87,12 +88,12 @@
 
     if (y > 0.34) {
       const t = (0.56 - y) / 0.22;
-      return mixColor(COLORS.warmWhite, COLORS.orange, clamp(t, 0, 1));
+      return mixColor(COLORS.warmWhite, COLORS.softOrange, clamp(t, 0, 1));
     }
 
     if (y > 0.18) {
       const t = (0.34 - y) / 0.16;
-      return mixColor(COLORS.orange, COLORS.hotOrange, clamp(t, 0, 1));
+      return mixColor(COLORS.softOrange, COLORS.hotOrange, clamp(t, 0, 1));
     }
 
     const t = y / 0.18;
@@ -581,39 +582,96 @@
   }
 
   function drawUpperOrangeSmoke() {
-    for (let i = 0; i < 8; i += 1) {
-      const yRatio = 0.09 + i * 0.022;
+    const specs = [
+      {
+        x: 0.34,
+        y: 0.095,
+        rx: 0.14,
+        ry: 0.055,
+        alpha: 0.13,
+        rot: -0.18,
+        boost: 1.7,
+      },
+      {
+        x: 0.5,
+        y: 0.105,
+        rx: 0.17,
+        ry: 0.065,
+        alpha: 0.14,
+        rot: 0.02,
+        boost: 1.85,
+      },
+      {
+        x: 0.66,
+        y: 0.11,
+        rx: 0.15,
+        ry: 0.06,
+        alpha: 0.13,
+        rot: 0.16,
+        boost: 1.72,
+      },
+      {
+        x: 0.42,
+        y: 0.17,
+        rx: 0.17,
+        ry: 0.07,
+        alpha: 0.082,
+        rot: -0.08,
+        boost: 1.08,
+      },
+      {
+        x: 0.58,
+        y: 0.18,
+        rx: 0.17,
+        ry: 0.07,
+        alpha: 0.082,
+        rot: 0.1,
+        boost: 1.08,
+      },
+      {
+        x: 0.5,
+        y: 0.245,
+        rx: 0.19,
+        ry: 0.082,
+        alpha: 0.05,
+        rot: 0.02,
+        boost: 0.66,
+      },
+    ];
+
+    for (const spec of specs) {
       const x =
         state.width *
-        (0.16 + i * 0.1 + Math.sin(state.time * 0.22 + i) * 0.026);
+        (spec.x + Math.sin(state.time * 0.22 + spec.x * 9) * 0.012);
       const y =
         state.height *
-        (0.11 + i * 0.015 + Math.cos(state.time * 0.18 + i * 0.7) * 0.01);
-      const rx = state.width * (0.12 + (i % 3) * 0.028);
-      const ry = state.height * (0.05 + (i % 2) * 0.015);
-      const rotation = Math.sin(state.time * 0.16 + i) * 0.18;
+        (spec.y + Math.cos(state.time * 0.18 + spec.y * 11) * 0.008);
+      const rx = state.width * spec.rx;
+      const ry = state.height * spec.ry;
+      const rotation =
+        spec.rot + Math.sin(state.time * 0.16 + spec.x * 7) * 0.08;
 
       drawSoftEllipseComposite(
         x,
         y,
         rx,
         ry,
-        0.12,
-        yRatio,
+        spec.alpha,
+        spec.y,
         rotation,
         "source-over",
-        1.6,
+        spec.boost,
       );
       drawSoftEllipseComposite(
         x,
         y,
-        rx * 0.64,
+        rx * 0.58,
         ry * 0.42,
-        0.08,
-        yRatio,
+        spec.alpha * 0.42,
+        spec.y,
         rotation,
         "screen",
-        1.1,
+        spec.boost * 0.46,
       );
     }
   }
@@ -731,7 +789,7 @@
         y,
         rx,
         ry,
-        0.005 + i * 0.0014,
+        0.006 + i * 0.0014,
         yRatio,
         0,
         "source-over",

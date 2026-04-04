@@ -113,19 +113,21 @@ body {
 
 .hidden-ju {
   position: absolute;
-  left: 61%;
-  top: 18%;
-  transform: translate(-50%, -50%) rotate(-7deg);
-  color: rgba(255, 136, 20, 0.28);
-  font-size: clamp(18px, 4.6vw, 28px);
-  font-weight: 600;
-  letter-spacing: 0.12em;
+  left: 77%;
+  top: 12%;
+  transform: translate(-50%, -50%) rotate(-6deg);
+  color: rgba(255, 251, 246, 0.44);
+  font-size: clamp(18px, 4.4vw, 27px);
+  font-weight: 500;
+  letter-spacing: 0.16em;
   text-transform: lowercase;
   user-select: none;
-  mix-blend-mode: multiply;
+  mix-blend-mode: screen;
   text-shadow:
-    0 0 10px rgba(255, 248, 238, 0.08),
-    0 0 16px rgba(255, 132, 18, 0.08);
+    0 0 8px rgba(255, 255, 255, 0.18),
+    0 0 16px rgba(255, 248, 240, 0.14),
+    0 0 28px rgba(255, 255, 255, 0.08),
+    0 0 42px rgba(255, 255, 255, 0.05);
 }
 
 .motion-permission-button {
