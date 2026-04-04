@@ -29,8 +29,6 @@
       targetAngleDrift: 0,
       sensorX: 0,
       sensorY: 0,
-      bandSpread: 0,
-      targetBandSpread: 0,
     },
     orientation: {
       enabled: false,
@@ -63,7 +61,7 @@
       image.data[i] = value;
       image.data[i + 1] = value;
       image.data[i + 2] = value;
-      image.data[i + 3] = 22;
+      image.data[i + 3] = 20;
     }
 
     nctx.putImageData(image, 0, 0);
@@ -113,7 +111,6 @@
 
     const dxNorm = dx / Math.max(1, state.width);
     const dyNorm = dy / Math.max(1, state.height);
-    const speed = Math.min(1.4, Math.hypot(dx, dy) / 32);
 
     state.motion.targetShiftX = clamp(
       state.motion.targetShiftX + dxNorm * 1.7,
@@ -126,14 +123,9 @@
       1,
     );
     state.motion.targetAngleDrift = clamp(
-      state.motion.targetAngleDrift + dxNorm * 0.8 - dyNorm * 0.3,
+      state.motion.targetAngleDrift + dxNorm * 0.76 - dyNorm * 0.28,
       -1,
       1,
-    );
-    state.motion.targetBandSpread = clamp(
-      state.motion.targetBandSpread + speed * 0.7,
-      0,
-      1.4,
     );
   }
 
@@ -207,13 +199,12 @@
       state.motion.targetShiftX *= decay(0.986, deltaSeconds);
       state.motion.targetShiftY *= decay(0.986, deltaSeconds);
       state.motion.targetAngleDrift *= decay(0.986, deltaSeconds);
-      state.motion.targetBandSpread *= decay(0.966, deltaSeconds);
     }
 
     const idleX =
-      Math.sin(state.time * 0.24) * 0.28 + Math.cos(state.time * 0.1) * 0.08;
+      Math.sin(state.time * 0.24) * 0.26 + Math.cos(state.time * 0.1) * 0.08;
     const idleY =
-      Math.cos(state.time * 0.19) * 0.18 + Math.sin(state.time * 0.13) * 0.06;
+      Math.cos(state.time * 0.19) * 0.16 + Math.sin(state.time * 0.13) * 0.05;
 
     const shiftX = clamp(
       state.motion.targetShiftX + state.motion.sensorX * 0.58 + idleX,
@@ -226,7 +217,7 @@
       1.2,
     );
     const angleDrift = clamp(
-      state.motion.targetAngleDrift + state.motion.sensorX * 0.4,
+      state.motion.targetAngleDrift + state.motion.sensorX * 0.38,
       -1.2,
       1.2,
     );
@@ -234,18 +225,13 @@
     state.motion.shiftX = lerp(state.motion.shiftX, shiftX, 0.065);
     state.motion.shiftY = lerp(state.motion.shiftY, shiftY, 0.065);
     state.motion.angleDrift = lerp(state.motion.angleDrift, angleDrift, 0.06);
-    state.motion.bandSpread = lerp(
-      state.motion.bandSpread,
-      state.motion.targetBandSpread,
-      0.06,
-    );
   }
 
   function drawGradientField() {
     const angle = Math.PI * (0.74 + state.motion.angleDrift * 0.05);
     const centerX = state.width * (0.52 + state.motion.shiftX * 0.018);
     const centerY = state.height * (0.49 + state.motion.shiftY * 0.018);
-    const radius = Math.max(state.width, state.height) * 1.02;
+    const radius = Math.max(state.width, state.height) * 1.06;
 
     const x1 = centerX - Math.cos(angle) * radius;
     const y1 = centerY - Math.sin(angle) * radius;
@@ -253,166 +239,92 @@
     const y2 = centerY + Math.sin(angle) * radius;
 
     const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
-    gradient.addColorStop(0, "rgba(13, 151, 235, 0.98)");
-    gradient.addColorStop(0.14, "rgba(15, 201, 224, 0.94)");
-    gradient.addColorStop(0.34, "rgba(168, 229, 223, 0.78)");
-    gradient.addColorStop(0.48, "rgba(242, 235, 222, 0.64)");
-    gradient.addColorStop(0.64, "rgba(248, 205, 132, 0.8)");
-    gradient.addColorStop(0.82, "rgba(247, 164, 48, 0.9)");
-    gradient.addColorStop(1, "rgba(242, 132, 0, 0.98)");
+    gradient.addColorStop(0, "rgba(0, 148, 238, 1)");
+    gradient.addColorStop(0.12, "rgba(0, 206, 228, 0.98)");
+    gradient.addColorStop(0.34, "rgba(168, 236, 226, 0.8)");
+    gradient.addColorStop(0.56, "rgba(240, 232, 219, 0.66)");
+    gradient.addColorStop(0.78, "rgba(248, 193, 92, 0.86)");
+    gradient.addColorStop(1, "rgba(240, 134, 0, 1)");
 
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, state.width, state.height);
 
     const cyanBloom = ctx.createRadialGradient(
-      state.width * (0.2 + state.motion.shiftX * 0.014),
-      state.height * (0.2 + state.motion.shiftY * 0.01),
+      state.width * (0.18 + state.motion.shiftX * 0.014),
+      state.height * (0.18 + state.motion.shiftY * 0.01),
       0,
-      state.width * 0.2,
-      state.height * 0.2,
-      Math.max(state.width, state.height) * 0.52,
+      state.width * 0.18,
+      state.height * 0.18,
+      Math.max(state.width, state.height) * 0.54,
     );
-    cyanBloom.addColorStop(0, "rgba(8, 206, 235, 0.24)");
-    cyanBloom.addColorStop(0.3, "rgba(8, 206, 235, 0.12)");
-    cyanBloom.addColorStop(1, "rgba(8, 206, 235, 0)");
+    cyanBloom.addColorStop(0, "rgba(0, 196, 236, 0.26)");
+    cyanBloom.addColorStop(0.28, "rgba(0, 196, 236, 0.12)");
+    cyanBloom.addColorStop(1, "rgba(0, 196, 236, 0)");
     ctx.fillStyle = cyanBloom;
     ctx.fillRect(0, 0, state.width, state.height);
 
     const orangeBloom = ctx.createRadialGradient(
-      state.width * (0.86 + state.motion.shiftX * 0.012),
-      state.height * (0.82 + state.motion.shiftY * 0.012),
+      state.width * (0.88 + state.motion.shiftX * 0.012),
+      state.height * (0.84 + state.motion.shiftY * 0.012),
       0,
-      state.width * 0.86,
-      state.height * 0.82,
-      Math.max(state.width, state.height) * 0.44,
+      state.width * 0.88,
+      state.height * 0.84,
+      Math.max(state.width, state.height) * 0.46,
     );
-    orangeBloom.addColorStop(0, "rgba(255, 142, 12, 0.28)");
-    orangeBloom.addColorStop(0.26, "rgba(255, 142, 12, 0.14)");
-    orangeBloom.addColorStop(1, "rgba(255, 142, 12, 0)");
+    orangeBloom.addColorStop(0, "rgba(255, 142, 0, 0.32)");
+    orangeBloom.addColorStop(0.24, "rgba(255, 142, 0, 0.15)");
+    orangeBloom.addColorStop(1, "rgba(255, 142, 0, 0)");
     ctx.fillStyle = orangeBloom;
     ctx.fillRect(0, 0, state.width, state.height);
   }
 
-  function drawBrightBand() {
-    ctx.save();
-    ctx.translate(
-      state.width * (0.52 + state.motion.shiftX * 0.018),
-      state.height * (0.49 + state.motion.shiftY * 0.018),
-    );
-    ctx.rotate(Math.PI * (0.74 + state.motion.angleDrift * 0.05));
-
-    const bandWidth =
-      Math.max(state.width, state.height) *
-      (0.38 + state.motion.bandSpread * 0.02);
-    const bandLength = Math.max(state.width, state.height) * 1.46;
-
-    const gradient = ctx.createLinearGradient(
-      0,
-      -bandLength * 0.5,
-      0,
-      bandLength * 0.5,
-    );
-    gradient.addColorStop(0, "rgba(255, 255, 255, 0)");
-    gradient.addColorStop(0.16, "rgba(255, 255, 255, 0.05)");
-    gradient.addColorStop(0.36, "rgba(255, 247, 232, 0.16)");
-    gradient.addColorStop(0.5, "rgba(255, 241, 220, 0.22)");
-    gradient.addColorStop(0.64, "rgba(255, 231, 198, 0.14)");
-    gradient.addColorStop(0.84, "rgba(255, 255, 255, 0.04)");
-    gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
-    ctx.fillStyle = gradient;
-    ctx.fillRect(-bandWidth * 0.5, -bandLength * 0.5, bandWidth, bandLength);
-
-    ctx.restore();
-  }
-
-  function drawPowderBand() {
-    ctx.save();
-    ctx.translate(
-      state.width * (0.54 + state.motion.shiftX * 0.018),
-      state.height * (0.5 + state.motion.shiftY * 0.016),
-    );
-    ctx.rotate(Math.PI * (0.76 + state.motion.angleDrift * 0.04));
-    ctx.globalAlpha = 0.12;
-
-    const bandWidth = Math.max(state.width, state.height) * 0.2;
-    const bandLength = Math.max(state.width, state.height) * 1.56;
-    const pattern = ctx.createPattern(state.noiseCanvas, "repeat");
-
-    if (pattern) {
-      ctx.fillStyle = pattern;
-      ctx.fillRect(-bandWidth * 0.5, -bandLength * 0.5, bandWidth, bandLength);
-    }
-
-    ctx.globalCompositeOperation = "soft-light";
-    const haze = ctx.createLinearGradient(
-      0,
-      -bandLength * 0.5,
-      0,
-      bandLength * 0.5,
-    );
-    haze.addColorStop(0, "rgba(255, 255, 255, 0)");
-    haze.addColorStop(0.22, "rgba(255, 255, 255, 0.1)");
-    haze.addColorStop(0.5, "rgba(255, 255, 255, 0.18)");
-    haze.addColorStop(0.78, "rgba(255, 255, 255, 0.08)");
-    haze.addColorStop(1, "rgba(255, 255, 255, 0)");
-    ctx.fillStyle = haze;
-    ctx.fillRect(
-      -bandWidth * 0.56,
-      -bandLength * 0.5,
-      bandWidth * 1.12,
-      bandLength,
-    );
-
-    ctx.restore();
-  }
-
-  function drawSoftBlurs() {
-    const blurs = [
+  function drawSoftVeils() {
+    const veils = [
       {
-        x: 0.14,
-        y: 0.16,
-        rx: 0.26,
-        ry: 0.2,
-        color: "rgba(112, 219, 255, 0.16)",
+        x: 0.18,
+        y: 0.18,
+        rx: 0.34,
+        ry: 0.24,
+        color: "rgba(112, 224, 255, 0.12)",
       },
       {
-        x: 0.42,
-        y: 0.58,
-        rx: 0.26,
-        ry: 0.2,
-        color: "rgba(255, 251, 243, 0.12)",
+        x: 0.52,
+        y: 0.5,
+        rx: 0.42,
+        ry: 0.28,
+        color: "rgba(255, 247, 232, 0.08)",
       },
       {
         x: 0.84,
-        y: 0.8,
-        rx: 0.26,
-        ry: 0.22,
-        color: "rgba(255, 172, 44, 0.12)",
+        y: 0.82,
+        rx: 0.34,
+        ry: 0.24,
+        color: "rgba(255, 176, 40, 0.1)",
       },
     ];
 
-    for (const blur of blurs) {
-      const gx = state.width * (blur.x + state.motion.shiftX * 0.014);
-      const gy = state.height * (blur.y + state.motion.shiftY * 0.01);
-      const rx = state.width * blur.rx;
-      const ry = state.height * blur.ry;
+    for (const veil of veils) {
+      const gx = state.width * (veil.x + state.motion.shiftX * 0.012);
+      const gy = state.height * (veil.y + state.motion.shiftY * 0.01);
+      const rx = state.width * veil.rx;
+      const ry = state.height * veil.ry;
 
       ctx.save();
       ctx.translate(gx, gy);
       ctx.scale(rx, ry);
       const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
-      gradient.addColorStop(0, blur.color);
-      gradient.addColorStop(0.46, blur.color.replace(/0\.\d+\)$/, "0.06)"));
-      gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+      gradient.addColorStop(0, veil.color);
+      gradient.addColorStop(0.48, veil.color.replace(/0\.\d+\)$/, "0.04)"));
+      gradient.addColorStop(1, "rgba(255,255,255,0)");
       ctx.fillStyle = gradient;
       ctx.fillRect(-1, -1, 2, 2);
       ctx.restore();
     }
   }
 
-  function drawNoiseOverlay() {
+  function drawPowderTexture() {
     ctx.save();
-    ctx.globalAlpha = 0.042;
+    ctx.globalAlpha = 0.038;
     const pattern = ctx.createPattern(state.noiseCanvas, "repeat");
 
     if (pattern) {
@@ -427,10 +339,8 @@
     ctx.clearRect(0, 0, state.width, state.height);
 
     drawGradientField();
-    drawBrightBand();
-    drawPowderBand();
-    drawSoftBlurs();
-    drawNoiseOverlay();
+    drawSoftVeils();
+    drawPowderTexture();
   }
 
   function frame(now) {
