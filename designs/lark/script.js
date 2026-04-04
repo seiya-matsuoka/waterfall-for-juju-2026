@@ -13,10 +13,10 @@
     deepRed: [148, 18, 28],
     white: [242, 236, 230],
     warmWhite: [255, 247, 238],
-    orange: [255, 126, 10],
-    hotOrange: [255, 148, 16],
-    vividOrange: [255, 136, 0],
-    softOrange: [255, 176, 86],
+    orange: [255, 128, 18],
+    hotOrange: [255, 146, 24],
+    vividOrange: [255, 138, 12],
+    softOrange: [255, 184, 108],
   };
 
   const state = {
@@ -500,9 +500,9 @@
     );
     topGlow.addColorStop(
       0,
-      `rgba(255, 170, 52, ${0.06 + state.motion.topGlow * 0.02})`,
+      `rgba(255, 170, 52, ${0.05 + state.motion.topGlow * 0.016})`,
     );
-    topGlow.addColorStop(0.4, "rgba(255, 150, 40, 0.02)");
+    topGlow.addColorStop(0.4, "rgba(255, 150, 40, 0.016)");
     topGlow.addColorStop(1, "rgba(255, 150, 40, 0)");
     ctx.fillStyle = topGlow;
     ctx.fillRect(0, 0, state.width, state.height * 0.4);
@@ -565,16 +565,16 @@
     const core = smokeColorByY(yRatio);
     const hot =
       yRatio < 0.3
-        ? mixColor(COLORS.orange, COLORS.vividOrange, 0.64)
+        ? mixColor(COLORS.orange, COLORS.vividOrange, 0.5)
         : yRatio > 0.68
           ? mixColor(COLORS.red, COLORS.warmWhite, 0.14)
-          : mixColor(COLORS.warmWhite, COLORS.orange, 0.12);
+          : mixColor(COLORS.warmWhite, COLORS.softOrange, 0.1);
 
     const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
-    gradient.addColorStop(0, rgba(hot, alpha * 0.82 * boost));
-    gradient.addColorStop(0.16, rgba(core, alpha * 0.72 * boost));
-    gradient.addColorStop(0.42, rgba(core, alpha * 0.38 * boost));
-    gradient.addColorStop(0.76, rgba(core, alpha * 0.12 * boost));
+    gradient.addColorStop(0, rgba(hot, alpha * 0.74 * boost));
+    gradient.addColorStop(0.16, rgba(core, alpha * 0.64 * boost));
+    gradient.addColorStop(0.42, rgba(core, alpha * 0.34 * boost));
+    gradient.addColorStop(0.76, rgba(core, alpha * 0.1 * boost));
     gradient.addColorStop(1, rgba(core, 0));
     ctx.fillStyle = gradient;
     ctx.fillRect(-1, -1, 2, 2);
@@ -588,54 +588,54 @@
         y: 0.095,
         rx: 0.14,
         ry: 0.055,
-        alpha: 0.13,
+        alpha: 0.09,
         rot: -0.18,
-        boost: 1.7,
+        boost: 1.34,
       },
       {
         x: 0.5,
         y: 0.105,
         rx: 0.17,
         ry: 0.065,
-        alpha: 0.14,
+        alpha: 0.098,
         rot: 0.02,
-        boost: 1.85,
+        boost: 1.44,
       },
       {
         x: 0.66,
         y: 0.11,
         rx: 0.15,
         ry: 0.06,
-        alpha: 0.13,
+        alpha: 0.09,
         rot: 0.16,
-        boost: 1.72,
+        boost: 1.34,
       },
       {
         x: 0.42,
         y: 0.17,
         rx: 0.17,
         ry: 0.07,
-        alpha: 0.082,
+        alpha: 0.056,
         rot: -0.08,
-        boost: 1.08,
+        boost: 0.86,
       },
       {
         x: 0.58,
         y: 0.18,
         rx: 0.17,
         ry: 0.07,
-        alpha: 0.082,
+        alpha: 0.056,
         rot: 0.1,
-        boost: 1.08,
+        boost: 0.86,
       },
       {
         x: 0.5,
         y: 0.245,
         rx: 0.19,
         ry: 0.082,
-        alpha: 0.05,
+        alpha: 0.03,
         rot: 0.02,
-        boost: 0.66,
+        boost: 0.46,
       },
     ];
 
@@ -667,11 +667,11 @@
         y,
         rx * 0.58,
         ry * 0.42,
-        spec.alpha * 0.42,
+        spec.alpha * 0.3,
         spec.y,
         rotation,
         "screen",
-        spec.boost * 0.46,
+        spec.boost * 0.3,
       );
     }
   }
@@ -709,7 +709,7 @@
         particle.rotationBias +
         state.motion.tiltX * 0.036;
 
-      const boost = yRatio < 0.34 ? 1.55 : 1;
+      const boost = yRatio < 0.34 ? 1.22 : 1;
 
       drawSoftEllipseComposite(
         x,
@@ -755,7 +755,7 @@
           yRatio,
           rotation * 0.55,
           "source-over",
-          boost * 0.9,
+          boost * 0.8,
         );
       }
 
@@ -769,7 +769,7 @@
           yRatio,
           rotation,
           "screen",
-          yRatio < 0.34 ? 0.56 : 0.4,
+          yRatio < 0.34 ? 0.38 : 0.28,
         );
       }
     }
