@@ -9,12 +9,12 @@
   const decay = (base, seconds) => Math.pow(base, seconds * 60);
 
   const COLORS = {
-    red: [194, 22, 40],
-    deepRed: [126, 8, 24],
-    white: [248, 242, 236],
+    red: [212, 34, 48],
+    deepRed: [140, 16, 28],
+    white: [244, 238, 232],
     warmWhite: [255, 248, 240],
-    orange: [255, 164, 64],
-    hotOrange: [255, 194, 88],
+    orange: [255, 122, 18],
+    hotOrange: [255, 150, 28],
   };
 
   const state = {
@@ -55,8 +55,8 @@
     },
   };
 
-  const plumeBands = [0.27, 0.35, 0.43, 0.5, 0.57, 0.65, 0.73];
-  const PARTICLE_COUNT = 230;
+  const plumeBands = [0.24, 0.32, 0.4, 0.48, 0.56, 0.64, 0.72, 0.8];
+  const PARTICLE_COUNT = 170;
 
   function rgba(rgb, alpha) {
     return `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alpha})`;
@@ -71,18 +71,23 @@
   }
 
   function smokeColorByY(y) {
-    if (y > 0.68) {
-      const t = (y - 0.68) / 0.32;
+    if (y > 0.76) {
+      const t = (y - 0.76) / 0.24;
       return mixColor(COLORS.red, COLORS.deepRed, clamp(t, 0, 1));
     }
 
-    if (y > 0.36) {
-      const t = (0.68 - y) / 0.32;
-      return mixColor(COLORS.deepRed, COLORS.white, clamp(t, 0, 1));
+    if (y > 0.48) {
+      const t = (0.76 - y) / 0.28;
+      return mixColor(COLORS.red, COLORS.warmWhite, clamp(t, 0, 1));
     }
 
-    const t = (0.36 - y) / 0.36;
-    return mixColor(COLORS.warmWhite, COLORS.orange, clamp(t, 0, 1));
+    if (y > 0.22) {
+      const t = (0.48 - y) / 0.26;
+      return mixColor(COLORS.warmWhite, COLORS.orange, clamp(t, 0, 1));
+    }
+
+    const t = y / 0.22;
+    return mixColor(COLORS.hotOrange, COLORS.orange, clamp(t, 0, 1));
   }
 
   function randomBetween(min, max) {
@@ -91,20 +96,19 @@
 
   function createParticle(initial = false) {
     const band = plumeBands[Math.floor(Math.random() * plumeBands.length)];
-    const y = initial ? Math.random() * 1.18 : randomBetween(1.02, 1.2);
+    const y = initial ? Math.random() * 1.2 : randomBetween(1.02, 1.24);
 
     return {
       band,
       y,
       xBias: randomBetween(-0.05, 0.05),
-      widthBase: randomBetween(0.014, 0.034),
-      heightBase: randomBetween(0.06, 0.14),
-      rise: randomBetween(0.08, 0.17),
-      drift: randomBetween(0.14, 0.34),
+      widthBase: randomBetween(0.012, 0.026),
+      rise: randomBetween(0.08, 0.16),
+      drift: randomBetween(0.14, 0.3),
       phase: randomBetween(0, Math.PI * 2),
-      wobble: randomBetween(0.7, 1.55),
-      alpha: randomBetween(0.06, 0.15),
-      rotationBias: randomBetween(-0.5, 0.5),
+      wobble: randomBetween(0.7, 1.5),
+      alpha: randomBetween(0.03, 0.085),
+      rotationBias: randomBetween(-0.55, 0.55),
       vx: 0,
       vy: 0,
     };
@@ -146,10 +150,11 @@
       life: 1,
       radius:
         Math.max(state.width, state.height) *
-        lerp(0.14, 0.34, Math.min(power, 1.6) / 1.6),
+        lerp(0.18, 0.34, Math.min(power, 1.8) / 1.8),
+      swirl: randomBetween(-1, 1),
     });
 
-    if (state.influences.length > 18) {
+    if (state.influences.length > 20) {
       state.influences.shift();
     }
   }
@@ -163,7 +168,7 @@
     state.pointer.vx = 0;
     state.pointer.vy = 0;
 
-    addInfluence(point.x, point.y, 0, -0.5, 0.55);
+    addInfluence(point.x, point.y, 0, -0.4, 0.55);
 
     if (event.pointerId != null && canvas.setPointerCapture) {
       try {
@@ -196,40 +201,40 @@
 
     const dxNorm = dx / Math.max(1, state.width);
     const dyNorm = dy / Math.max(1, state.height);
-    const speed = Math.min(2, Math.hypot(dx, dy) / 24);
+    const speed = Math.min(2, Math.hypot(dx, dy) / 22);
 
     state.motion.targetTiltX = clamp(
       state.motion.targetTiltX + dxNorm * 2.2,
+      -1.8,
+      1.8,
+    );
+    state.motion.targetTiltY = clamp(
+      state.motion.targetTiltY - dyNorm * 1.8,
       -1.5,
       1.5,
     );
-    state.motion.targetTiltY = clamp(
-      state.motion.targetTiltY - dyNorm * 1.7,
-      -1.2,
-      1.2,
-    );
     state.motion.targetSmokeEnergy = clamp(
-      state.motion.targetSmokeEnergy + speed * 0.46 + Math.abs(dyNorm) * 0.54,
+      state.motion.targetSmokeEnergy + speed * 0.34 + Math.abs(dyNorm) * 0.46,
       0,
-      3.4,
+      2.6,
     );
     state.motion.targetTopGlow = clamp(
-      state.motion.targetTopGlow + speed * 0.22 + Math.abs(dyNorm) * 0.2,
+      state.motion.targetTopGlow + speed * 0.12 + Math.abs(dyNorm) * 0.12,
       0,
-      2.2,
+      1.4,
     );
     state.motion.targetFlowX = clamp(
-      state.motion.targetFlowX + dxNorm * 1.5,
-      -2,
-      2,
+      state.motion.targetFlowX + dxNorm * 2.0,
+      -2.4,
+      2.4,
     );
     state.motion.targetFlowY = clamp(
-      state.motion.targetFlowY + dyNorm * 1.1,
-      -1.6,
-      1.6,
+      state.motion.targetFlowY + dyNorm * 1.4,
+      -2.0,
+      2.0,
     );
 
-    addInfluence(point.x, point.y, dx * 0.26, dy * 0.26 - 0.8, speed);
+    addInfluence(point.x, point.y, dx * 0.28, dy * 0.28 - 0.86, speed);
   }
 
   function onPointerUp(event) {
@@ -300,11 +305,11 @@
       const influence = state.influences[i];
       influence.x += influence.vx;
       influence.y += influence.vy;
-      influence.vx *= decay(0.96, deltaSeconds);
-      influence.vy *= decay(0.95, deltaSeconds);
-      influence.vy -= 0.014;
-      influence.life *= decay(0.968, deltaSeconds);
-      influence.power *= decay(0.972, deltaSeconds);
+      influence.vx *= decay(0.974, deltaSeconds);
+      influence.vy *= decay(0.97, deltaSeconds);
+      influence.vy -= 0.01;
+      influence.life *= decay(0.982, deltaSeconds);
+      influence.power *= decay(0.98, deltaSeconds);
       influence.radius += 28 * deltaSeconds * 60;
 
       if (influence.life < 0.08 || influence.power < 0.05) {
@@ -325,8 +330,13 @@
         -(distance * distance) / (influence.radius * influence.radius),
       );
 
-      fx += (influence.vx * 0.09 + dx * 0.0011) * impact * influence.power;
-      fy += (influence.vy * 0.08 + dy * 0.0006) * impact * influence.power;
+      const swirlX = -dy * 0.0012 * influence.swirl;
+      const swirlY = dx * 0.0008 * influence.swirl;
+
+      fx +=
+        (influence.vx * 0.1 + dx * 0.0011 + swirlX) * impact * influence.power;
+      fy +=
+        (influence.vy * 0.08 + dy * 0.0007 + swirlY) * impact * influence.power;
     }
 
     return { fx, fy };
@@ -339,19 +349,19 @@
       const particle = state.particles[i];
 
       const progress = 1 - clamp(particle.y, 0, 1);
-      const widen = Math.pow(progress, 1.7);
+      const widen = Math.pow(progress, 1.55);
 
       const ambientX =
         Math.sin(
-          state.time * 0.42 * particle.wobble + particle.phase + progress * 5.2,
+          state.time * 0.4 * particle.wobble + particle.phase + progress * 5.4,
         ) *
           state.width *
           particle.drift *
-          (0.05 + widen * 0.22) +
-        Math.cos(state.time * 0.22 + particle.phase * 1.2 + progress * 8.4) *
+          (0.08 + widen * 0.34) +
+        Math.cos(state.time * 0.22 + particle.phase * 1.2 + progress * 9.2) *
           state.width *
           particle.drift *
-          0.06;
+          0.1;
 
       const bandX = state.width * particle.band;
       const px = bandX + state.width * particle.xBias + ambientX + particle.vx;
@@ -361,30 +371,30 @@
       particle.vx += influence.fx;
       particle.vy += influence.fy;
 
-      particle.vx *= decay(0.966, deltaSeconds);
-      particle.vy *= decay(0.968, deltaSeconds);
+      particle.vx *= decay(0.974, deltaSeconds);
+      particle.vy *= decay(0.976, deltaSeconds);
 
       const rise =
-        (particle.rise + progress * 0.024 + state.motion.smokeEnergy * 0.006) *
+        (particle.rise + progress * 0.022 + state.motion.smokeEnergy * 0.005) *
         dt60;
       particle.y -= rise / 100;
 
       particle.vx +=
         (state.motion.tiltX +
-          state.motion.sensorX * 0.44 +
-          state.motion.flowX * 0.5) *
+          state.motion.sensorX * 0.46 +
+          state.motion.flowX * 0.68) *
         0.18 *
         dt60 *
         0.01;
       particle.vy +=
         (-0.22 +
-          state.motion.tiltY * 0.05 +
-          state.motion.sensorY * 0.04 +
-          state.motion.flowY * 0.18) *
+          state.motion.tiltY * 0.06 +
+          state.motion.sensorY * 0.05 +
+          state.motion.flowY * 0.24) *
         dt60 *
         0.01;
 
-      if (particle.y < -0.14) {
+      if (particle.y < -0.16) {
         state.particles[i] = createParticle(false);
       }
     }
@@ -396,42 +406,42 @@
     if (!state.pointer.active) {
       state.pointer.vx *= decay(0.9, deltaSeconds);
       state.pointer.vy *= decay(0.9, deltaSeconds);
-      state.motion.targetSmokeEnergy *= decay(0.962, deltaSeconds);
-      state.motion.targetTopGlow *= decay(0.958, deltaSeconds);
-      state.motion.targetFlowX *= decay(0.972, deltaSeconds);
-      state.motion.targetFlowY *= decay(0.972, deltaSeconds);
+      state.motion.targetSmokeEnergy *= decay(0.97, deltaSeconds);
+      state.motion.targetTopGlow *= decay(0.968, deltaSeconds);
+      state.motion.targetFlowX *= decay(0.982, deltaSeconds);
+      state.motion.targetFlowY *= decay(0.982, deltaSeconds);
     }
 
-    state.motion.targetTiltX *= decay(0.988, deltaSeconds);
-    state.motion.targetTiltY *= decay(0.988, deltaSeconds);
+    state.motion.targetTiltX *= decay(0.992, deltaSeconds);
+    state.motion.targetTiltY *= decay(0.992, deltaSeconds);
 
     const idleX =
-      Math.sin(state.time * 0.34) * 0.26 + Math.cos(state.time * 0.12) * 0.1;
+      Math.sin(state.time * 0.34) * 0.24 + Math.cos(state.time * 0.12) * 0.1;
     const idleY =
-      Math.cos(state.time * 0.28) * 0.16 + Math.sin(state.time * 0.16) * 0.06;
+      Math.cos(state.time * 0.28) * 0.14 + Math.sin(state.time * 0.16) * 0.06;
 
     const tiltX = clamp(
-      state.motion.targetTiltX + state.motion.sensorX * 0.68 + idleX,
-      -1.7,
-      1.7,
+      state.motion.targetTiltX + state.motion.sensorX * 0.72 + idleX,
+      -1.9,
+      1.9,
     );
     const tiltY = clamp(
-      state.motion.targetTiltY + state.motion.sensorY * 0.46 + idleY,
-      -1.3,
-      1.3,
+      state.motion.targetTiltY + state.motion.sensorY * 0.5 + idleY,
+      -1.5,
+      1.5,
     );
 
     const smokeEnergy =
-      0.32 +
+      0.24 +
       state.motion.targetSmokeEnergy +
-      Math.abs(state.motion.sensorY) * 0.16 +
+      Math.abs(state.motion.sensorY) * 0.12 +
       Math.abs(tiltY) * 0.05;
 
     const topGlow =
-      0.32 +
+      0.18 +
       state.motion.targetTopGlow +
-      Math.abs(state.motion.sensorX) * 0.14 +
-      Math.abs(state.motion.sensorY) * 0.1;
+      Math.abs(state.motion.sensorX) * 0.1 +
+      Math.abs(state.motion.sensorY) * 0.08;
 
     state.motion.tiltX = lerp(state.motion.tiltX, tiltX, 0.08);
     state.motion.tiltY = lerp(state.motion.tiltY, tiltY, 0.08);
@@ -458,9 +468,13 @@
 
   function drawBackdrop() {
     const fill = ctx.createLinearGradient(0, 0, 0, state.height);
-    fill.addColorStop(0, "#090203");
-    fill.addColorStop(0.28, "#0c0204");
-    fill.addColorStop(0.6, "#080203");
+    fill.addColorStop(0, "#f7f1e8");
+    fill.addColorStop(0.12, "#f5efe6");
+    fill.addColorStop(0.26, "#f2eadf");
+    fill.addColorStop(0.34, "#ebe0d4");
+    fill.addColorStop(0.46, "#b58661");
+    fill.addColorStop(0.62, "#3a1713");
+    fill.addColorStop(0.82, "#100305");
     fill.addColorStop(1, "#040102");
     ctx.fillStyle = fill;
     ctx.fillRect(0, 0, state.width, state.height);
@@ -468,66 +482,35 @@
     ctx.save();
     ctx.globalCompositeOperation = "screen";
 
+    const topGlow = ctx.createRadialGradient(
+      state.width * (0.54 + state.motion.tiltX * 0.008),
+      state.height * 0.08,
+      0,
+      state.width * (0.54 + state.motion.tiltX * 0.008),
+      state.height * 0.08,
+      Math.max(state.width, state.height) * 0.24,
+    );
+    topGlow.addColorStop(
+      0,
+      `rgba(255, 170, 52, ${0.06 + state.motion.topGlow * 0.02})`,
+    );
+    topGlow.addColorStop(0.4, "rgba(255, 150, 40, 0.02)");
+    topGlow.addColorStop(1, "rgba(255, 150, 40, 0)");
+    ctx.fillStyle = topGlow;
+    ctx.fillRect(0, 0, state.width, state.height * 0.4);
+
     const bottomRed = ctx.createRadialGradient(
       state.width * 0.5,
       state.height * 1.04,
       0,
       state.width * 0.5,
       state.height * 1.04,
-      Math.max(state.width, state.height) * 0.48,
+      Math.max(state.width, state.height) * 0.34,
     );
-    bottomRed.addColorStop(0, "rgba(204, 24, 42, 0.34)");
-    bottomRed.addColorStop(0.18, "rgba(172, 18, 36, 0.22)");
-    bottomRed.addColorStop(0.4, "rgba(126, 12, 26, 0.1)");
+    bottomRed.addColorStop(0, "rgba(214, 28, 46, 0.12)");
+    bottomRed.addColorStop(0.22, "rgba(176, 18, 36, 0.04)");
     bottomRed.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = bottomRed;
-    ctx.fillRect(0, 0, state.width, state.height);
-
-    const topOrange = ctx.createRadialGradient(
-      state.width * (0.52 + state.motion.tiltX * 0.012),
-      -state.height * 0.14,
-      0,
-      state.width * (0.52 + state.motion.tiltX * 0.012),
-      -state.height * 0.14,
-      Math.max(state.width, state.height) * 0.86,
-    );
-    topOrange.addColorStop(
-      0,
-      `rgba(255, 198, 96, ${0.5 + state.motion.topGlow * 0.1})`,
-    );
-    topOrange.addColorStop(
-      0.16,
-      `rgba(255, 178, 78, ${0.28 + state.motion.topGlow * 0.08})`,
-    );
-    topOrange.addColorStop(0.36, "rgba(255, 160, 70, 0.12)");
-    topOrange.addColorStop(1, "rgba(0,0,0,0)");
-    ctx.fillStyle = topOrange;
-    ctx.fillRect(0, 0, state.width, state.height * 0.9);
-
-    const beamA = ctx.createLinearGradient(
-      state.width * 0.28,
-      -state.height * 0.04,
-      state.width * 0.46,
-      state.height * 0.72,
-    );
-    beamA.addColorStop(0, "rgba(255, 190, 90, 0.14)");
-    beamA.addColorStop(0.22, "rgba(255, 178, 80, 0.1)");
-    beamA.addColorStop(0.46, "rgba(255, 166, 72, 0.04)");
-    beamA.addColorStop(1, "rgba(255, 166, 72, 0)");
-    ctx.fillStyle = beamA;
-    ctx.fillRect(0, 0, state.width, state.height);
-
-    const beamB = ctx.createLinearGradient(
-      state.width * 0.72,
-      -state.height * 0.04,
-      state.width * 0.54,
-      state.height * 0.72,
-    );
-    beamB.addColorStop(0, "rgba(255, 190, 90, 0.14)");
-    beamB.addColorStop(0.22, "rgba(255, 178, 80, 0.1)");
-    beamB.addColorStop(0.46, "rgba(255, 166, 72, 0.04)");
-    beamB.addColorStop(1, "rgba(255, 166, 72, 0)");
-    ctx.fillStyle = beamB;
     ctx.fillRect(0, 0, state.width, state.height);
 
     ctx.restore();
@@ -545,8 +528,8 @@
       state.height * 0.972,
       state.width * 0.18,
     );
-    base.addColorStop(0, "rgba(255,248,240,0.12)");
-    base.addColorStop(0.3, "rgba(255,248,240,0.05)");
+    base.addColorStop(0, "rgba(255,248,240,0.08)");
+    base.addColorStop(0.3, "rgba(255,248,240,0.03)");
     base.addColorStop(1, "rgba(255,248,240,0)");
     ctx.fillStyle = base;
     ctx.fillRect(0, 0, state.width, state.height);
@@ -562,17 +545,17 @@
 
     const core = smokeColorByY(yRatio);
     const hot =
-      yRatio < 0.34
-        ? mixColor(COLORS.white, COLORS.orange, 0.55)
-        : yRatio > 0.68
-          ? mixColor(COLORS.red, COLORS.white, 0.25)
-          : mixColor(COLORS.white, COLORS.warmWhite, 0.5);
+      yRatio < 0.24
+        ? mixColor(COLORS.orange, COLORS.hotOrange, 0.6)
+        : yRatio > 0.66
+          ? mixColor(COLORS.red, COLORS.warmWhite, 0.14)
+          : mixColor(COLORS.warmWhite, COLORS.orange, 0.12);
 
     const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
-    gradient.addColorStop(0, rgba(hot, alpha * 1.08));
-    gradient.addColorStop(0.18, rgba(core, alpha * 0.92));
-    gradient.addColorStop(0.44, rgba(core, alpha * 0.48));
-    gradient.addColorStop(0.74, rgba(core, alpha * 0.14));
+    gradient.addColorStop(0, rgba(hot, alpha * 0.72));
+    gradient.addColorStop(0.16, rgba(core, alpha * 0.66));
+    gradient.addColorStop(0.42, rgba(core, alpha * 0.34));
+    gradient.addColorStop(0.76, rgba(core, alpha * 0.1));
     gradient.addColorStop(1, rgba(core, 0));
     ctx.fillStyle = gradient;
     ctx.fillRect(-1, -1, 2, 2);
@@ -587,33 +570,33 @@
       const particle = state.particles[i];
       const yRatio = clamp(particle.y, 0, 1);
       const progress = 1 - yRatio;
-      const widen = Math.pow(progress, 1.6);
+      const widen = Math.pow(progress, 1.55);
       const bandX = state.width * particle.band;
 
       const ambientX =
         Math.sin(
-          state.time * 0.42 * particle.wobble + particle.phase + progress * 5.4,
+          state.time * 0.4 * particle.wobble + particle.phase + progress * 5.4,
         ) *
           state.width *
           particle.drift *
-          (0.07 + widen * 0.28) +
-        Math.cos(state.time * 0.22 + particle.phase * 1.2 + progress * 8.8) *
+          (0.08 + widen * 0.34) +
+        Math.cos(state.time * 0.22 + particle.phase * 1.2 + progress * 9.2) *
           state.width *
           particle.drift *
-          0.08;
+          0.1;
 
       const x = bandX + state.width * particle.xBias + ambientX + particle.vx;
       const y = state.height * particle.y + particle.vy;
       const width =
         state.width *
-        lerp(particle.widthBase, particle.widthBase * 15.5, widen);
-      const height = width * lerp(4.8, 2.0, progress);
+        lerp(particle.widthBase, particle.widthBase * 14.5, widen);
+      const height = width * lerp(4.6, 2.0, progress);
       const alpha =
-        particle.alpha + progress * 0.06 + state.motion.smokeEnergy * 0.012;
+        particle.alpha + progress * 0.04 + state.motion.smokeEnergy * 0.006;
       const rotation =
-        Math.sin(state.time * 0.18 + particle.phase) * 0.24 +
+        Math.sin(state.time * 0.18 + particle.phase) * 0.28 +
         particle.rotationBias +
-        state.motion.tiltX * 0.03;
+        state.motion.tiltX * 0.036;
 
       drawSoftEllipse(x, y, width, height, alpha, yRatio, rotation);
       drawSoftEllipse(
@@ -621,39 +604,39 @@
         y + height * 0.05,
         width * 0.9,
         height * 0.94,
-        alpha * 0.62,
+        alpha * 0.52,
         yRatio,
-        rotation - 0.22,
+        rotation - 0.24,
       );
       drawSoftEllipse(
         x + width * (0.22 + progress * 0.2),
         y - height * 0.03,
         width * 0.9,
         height * 0.94,
-        alpha * 0.62,
+        alpha * 0.52,
         yRatio,
-        rotation + 0.2,
+        rotation + 0.22,
       );
 
-      if (progress > 0.18) {
+      if (progress > 0.14) {
         drawSoftEllipse(
-          x + Math.sin(state.time * 0.24 + particle.phase) * width * 0.14,
+          x + Math.sin(state.time * 0.24 + particle.phase) * width * 0.16,
           y + Math.cos(state.time * 0.2 + particle.phase) * height * 0.07,
-          width * (1.32 + progress * 0.34),
-          height * (1.02 + progress * 0.24),
-          alpha * 0.22,
+          width * (1.26 + progress * 0.34),
+          height * (1.0 + progress * 0.22),
+          alpha * 0.16,
           yRatio,
           rotation * 0.55,
         );
       }
 
-      if (progress > 0.34) {
+      if (progress > 0.28) {
         drawSoftEllipse(
           x,
           y,
-          width * 0.48,
-          height * 0.34,
-          alpha * 0.34,
+          width * 0.46,
+          height * 0.28,
+          alpha * 0.18,
           yRatio,
           rotation,
         );
@@ -667,14 +650,14 @@
     ctx.save();
     ctx.globalCompositeOperation = "screen";
 
-    for (let i = 0; i < 9; i += 1) {
-      const t = i / 8;
-      const y = state.height * (0.12 + i * 0.095);
+    for (let i = 0; i < 8; i += 1) {
+      const t = i / 7;
+      const y = state.height * (0.16 + i * 0.094);
       const x =
         state.width * (0.5 + Math.sin(state.time * 0.14 + i * 0.84) * 0.06);
-      const rx = state.width * (0.28 + i * 0.05);
-      const ry = state.height * (0.1 + i * 0.024);
-      drawSoftEllipse(x, y, rx, ry, 0.016 + i * 0.004, 0.42 + t * 0.38, 0);
+      const rx = state.width * (0.24 + i * 0.04);
+      const ry = state.height * (0.08 + i * 0.022);
+      drawSoftEllipse(x, y, rx, ry, 0.006 + i * 0.0016, 0.42 + t * 0.38, 0);
     }
 
     ctx.restore();
@@ -693,9 +676,9 @@
         influence.y,
         influence.radius * 0.9,
       );
-      veil.addColorStop(0, "rgba(255,255,255,0.08)");
-      veil.addColorStop(0.24, "rgba(255,255,255,0.04)");
-      veil.addColorStop(0.6, "rgba(255,255,255,0.014)");
+      veil.addColorStop(0, "rgba(255,255,255,0.05)");
+      veil.addColorStop(0.24, "rgba(255,255,255,0.024)");
+      veil.addColorStop(0.6, "rgba(255,255,255,0.008)");
       veil.addColorStop(1, "rgba(255,255,255,0)");
       ctx.globalAlpha = influence.life;
       ctx.fillStyle = veil;
@@ -722,10 +705,10 @@
       state.height,
     );
     glaze.addColorStop(0, "rgba(255,255,255,0)");
-    glaze.addColorStop(0.12, "rgba(255,255,255,0.05)");
-    glaze.addColorStop(0.28, "rgba(255,255,255,0.14)");
-    glaze.addColorStop(0.52, "rgba(255,170,92,0.12)");
-    glaze.addColorStop(0.76, "rgba(255,255,255,0.04)");
+    glaze.addColorStop(0.16, "rgba(255,255,255,0.015)");
+    glaze.addColorStop(0.32, "rgba(255,245,236,0.035)");
+    glaze.addColorStop(0.52, "rgba(255,160,62,0.02)");
+    glaze.addColorStop(0.78, "rgba(255,255,255,0.008)");
     glaze.addColorStop(1, "rgba(255,255,255,0)");
     ctx.fillStyle = glaze;
     ctx.fillRect(0, 0, state.width, state.height);

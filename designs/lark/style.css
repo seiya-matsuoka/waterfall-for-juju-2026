@@ -40,18 +40,16 @@ body {
   overflow: hidden;
   touch-action: none;
   overscroll-behavior: none;
-  background:
-    radial-gradient(
-      circle at 50% 106%,
-      rgba(188, 18, 38, 0.34),
-      transparent 30%
-    ),
-    radial-gradient(
-      circle at 52% -8%,
-      rgba(255, 186, 96, 0.18),
-      transparent 34%
-    ),
-    linear-gradient(180deg, #090203 0%, #0c0204 24%, #0a0203 56%, #050102 100%);
+  background: linear-gradient(
+    180deg,
+    #f6f0e7 0%,
+    #f4eee4 12%,
+    #efe6db 24%,
+    #ddd1c4 34%,
+    #6c3d2b 54%,
+    #140406 76%,
+    #050102 100%
+  );
 }
 
 #lark-canvas {
@@ -70,16 +68,16 @@ body {
   inset: 0;
   background:
     radial-gradient(
-      circle at 50% 42%,
-      transparent 14%,
-      rgba(0, 0, 0, 0.08) 58%,
-      rgba(0, 0, 0, 0.5) 100%
+      circle at 50% 40%,
+      transparent 22%,
+      rgba(0, 0, 0, 0.04) 62%,
+      rgba(0, 0, 0, 0.34) 100%
     ),
     linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.008),
-      transparent 14%,
-      transparent 86%,
+      rgba(255, 255, 255, 0.02),
+      transparent 18%,
+      transparent 82%,
       rgba(0, 0, 0, 0.18)
     );
   mix-blend-mode: multiply;
@@ -88,30 +86,31 @@ body {
 .scene-grain {
   position: absolute;
   inset: 0;
-  opacity: 0.01;
+  opacity: 0.001;
   background-image: radial-gradient(
     circle at 1px 1px,
-    rgba(255, 255, 255, 0.82) 0.5px,
+    rgba(255, 255, 255, 0.8) 0.5px,
     transparent 0.72px
   );
-  background-size: 5px 5px;
+  background-size: 6px 6px;
   mix-blend-mode: soft-light;
 }
 
 .hidden-ju {
   position: absolute;
-  left: 50%;
-  bottom: 13%;
-  transform: translateX(-50%);
-  color: rgba(255, 245, 238, 0.12);
-  font-size: clamp(18px, 4.8vw, 30px);
+  left: 61%;
+  top: 18%;
+  transform: translate(-50%, -50%) rotate(-7deg);
+  color: rgba(255, 163, 58, 0.22);
+  font-size: clamp(18px, 4.6vw, 28px);
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: lowercase;
   user-select: none;
+  mix-blend-mode: multiply;
   text-shadow:
-    0 0 12px rgba(255, 255, 255, 0.08),
-    0 0 22px rgba(255, 160, 82, 0.07);
+    0 0 10px rgba(255, 248, 238, 0.14),
+    0 0 16px rgba(255, 142, 28, 0.12);
 }
 
 .motion-permission-button {
