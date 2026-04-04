@@ -9,12 +9,13 @@
   const decay = (base, seconds) => Math.pow(base, seconds * 60);
 
   const COLORS = {
-    red: [212, 34, 48],
-    deepRed: [140, 16, 28],
-    white: [244, 238, 232],
-    warmWhite: [255, 248, 240],
-    orange: [255, 122, 18],
-    hotOrange: [255, 150, 28],
+    red: [218, 34, 46],
+    deepRed: [148, 18, 28],
+    white: [242, 236, 230],
+    warmWhite: [255, 247, 238],
+    orange: [255, 124, 16],
+    hotOrange: [255, 146, 18],
+    vividOrange: [255, 136, 10],
   };
 
   const state = {
@@ -56,7 +57,6 @@
   };
 
   const plumeBands = [0.24, 0.32, 0.4, 0.48, 0.56, 0.64, 0.72, 0.8];
-  const PARTICLE_COUNT = 170;
 
   function rgba(rgb, alpha) {
     return `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alpha})`;
@@ -71,23 +71,32 @@
   }
 
   function smokeColorByY(y) {
-    if (y > 0.76) {
-      const t = (y - 0.76) / 0.24;
+    if (y > 0.8) {
+      const t = (y - 0.8) / 0.2;
       return mixColor(COLORS.red, COLORS.deepRed, clamp(t, 0, 1));
     }
 
-    if (y > 0.48) {
-      const t = (0.76 - y) / 0.28;
-      return mixColor(COLORS.red, COLORS.warmWhite, clamp(t, 0, 1));
+    if (y > 0.56) {
+      const t = (0.8 - y) / 0.24;
+      return mixColor(
+        mixColor(COLORS.red, COLORS.warmWhite, 0.06),
+        mixColor(COLORS.red, COLORS.warmWhite, 0.34),
+        clamp(t, 0, 1),
+      );
     }
 
-    if (y > 0.22) {
-      const t = (0.48 - y) / 0.26;
+    if (y > 0.34) {
+      const t = (0.56 - y) / 0.22;
       return mixColor(COLORS.warmWhite, COLORS.orange, clamp(t, 0, 1));
     }
 
-    const t = y / 0.22;
-    return mixColor(COLORS.hotOrange, COLORS.orange, clamp(t, 0, 1));
+    if (y > 0.18) {
+      const t = (0.34 - y) / 0.16;
+      return mixColor(COLORS.orange, COLORS.hotOrange, clamp(t, 0, 1));
+    }
+
+    const t = y / 0.18;
+    return mixColor(COLORS.hotOrange, COLORS.vividOrange, clamp(t, 0, 1));
   }
 
   function randomBetween(min, max) {
@@ -115,9 +124,7 @@
   }
 
   function seedParticles() {
-    state.particles = Array.from({ length: PARTICLE_COUNT }, () =>
-      createParticle(true),
-    );
+    state.particles = Array.from({ length: 170 }, () => createParticle(true));
   }
 
   function resize() {
@@ -537,35 +544,81 @@
     ctx.restore();
   }
 
-  function drawSoftEllipse(x, y, rx, ry, alpha, yRatio, rotation) {
+  function drawSoftEllipseComposite(
+    x,
+    y,
+    rx,
+    ry,
+    alpha,
+    yRatio,
+    rotation,
+    composite,
+    boost = 1,
+  ) {
     ctx.save();
+    ctx.globalCompositeOperation = composite;
     ctx.translate(x, y);
     ctx.rotate(rotation);
     ctx.scale(rx, ry);
 
     const core = smokeColorByY(yRatio);
     const hot =
-      yRatio < 0.24
-        ? mixColor(COLORS.orange, COLORS.hotOrange, 0.6)
-        : yRatio > 0.66
+      yRatio < 0.3
+        ? mixColor(COLORS.orange, COLORS.vividOrange, 0.64)
+        : yRatio > 0.68
           ? mixColor(COLORS.red, COLORS.warmWhite, 0.14)
           : mixColor(COLORS.warmWhite, COLORS.orange, 0.12);
 
     const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
-    gradient.addColorStop(0, rgba(hot, alpha * 0.72));
-    gradient.addColorStop(0.16, rgba(core, alpha * 0.66));
-    gradient.addColorStop(0.42, rgba(core, alpha * 0.34));
-    gradient.addColorStop(0.76, rgba(core, alpha * 0.1));
+    gradient.addColorStop(0, rgba(hot, alpha * 0.82 * boost));
+    gradient.addColorStop(0.16, rgba(core, alpha * 0.72 * boost));
+    gradient.addColorStop(0.42, rgba(core, alpha * 0.38 * boost));
+    gradient.addColorStop(0.76, rgba(core, alpha * 0.12 * boost));
     gradient.addColorStop(1, rgba(core, 0));
     ctx.fillStyle = gradient;
     ctx.fillRect(-1, -1, 2, 2);
     ctx.restore();
   }
 
-  function renderParticles() {
-    ctx.save();
-    ctx.globalCompositeOperation = "screen";
+  function drawUpperOrangeSmoke() {
+    for (let i = 0; i < 8; i += 1) {
+      const yRatio = 0.09 + i * 0.022;
+      const x =
+        state.width *
+        (0.16 + i * 0.1 + Math.sin(state.time * 0.22 + i) * 0.026);
+      const y =
+        state.height *
+        (0.11 + i * 0.015 + Math.cos(state.time * 0.18 + i * 0.7) * 0.01);
+      const rx = state.width * (0.12 + (i % 3) * 0.028);
+      const ry = state.height * (0.05 + (i % 2) * 0.015);
+      const rotation = Math.sin(state.time * 0.16 + i) * 0.18;
 
+      drawSoftEllipseComposite(
+        x,
+        y,
+        rx,
+        ry,
+        0.12,
+        yRatio,
+        rotation,
+        "source-over",
+        1.6,
+      );
+      drawSoftEllipseComposite(
+        x,
+        y,
+        rx * 0.64,
+        ry * 0.42,
+        0.08,
+        yRatio,
+        rotation,
+        "screen",
+        1.1,
+      );
+    }
+  }
+
+  function renderParticles() {
     for (let i = 0; i < state.particles.length; i += 1) {
       const particle = state.particles[i];
       const yRatio = clamp(particle.y, 0, 1);
@@ -598,8 +651,20 @@
         particle.rotationBias +
         state.motion.tiltX * 0.036;
 
-      drawSoftEllipse(x, y, width, height, alpha, yRatio, rotation);
-      drawSoftEllipse(
+      const boost = yRatio < 0.34 ? 1.55 : 1;
+
+      drawSoftEllipseComposite(
+        x,
+        y,
+        width,
+        height,
+        alpha,
+        yRatio,
+        rotation,
+        "source-over",
+        boost,
+      );
+      drawSoftEllipseComposite(
         x - width * (0.22 + progress * 0.2),
         y + height * 0.05,
         width * 0.9,
@@ -607,8 +672,10 @@
         alpha * 0.52,
         yRatio,
         rotation - 0.24,
+        "source-over",
+        boost,
       );
-      drawSoftEllipse(
+      drawSoftEllipseComposite(
         x + width * (0.22 + progress * 0.2),
         y - height * 0.03,
         width * 0.9,
@@ -616,10 +683,12 @@
         alpha * 0.52,
         yRatio,
         rotation + 0.22,
+        "source-over",
+        boost,
       );
 
       if (progress > 0.14) {
-        drawSoftEllipse(
+        drawSoftEllipseComposite(
           x + Math.sin(state.time * 0.24 + particle.phase) * width * 0.16,
           y + Math.cos(state.time * 0.2 + particle.phase) * height * 0.07,
           width * (1.26 + progress * 0.34),
@@ -627,11 +696,13 @@
           alpha * 0.16,
           yRatio,
           rotation * 0.55,
+          "source-over",
+          boost * 0.9,
         );
       }
 
       if (progress > 0.28) {
-        drawSoftEllipse(
+        drawSoftEllipseComposite(
           x,
           y,
           width * 0.46,
@@ -639,28 +710,34 @@
           alpha * 0.18,
           yRatio,
           rotation,
+          "screen",
+          yRatio < 0.34 ? 0.56 : 0.4,
         );
       }
     }
-
-    ctx.restore();
   }
 
   function drawAtmosphericHaze() {
-    ctx.save();
-    ctx.globalCompositeOperation = "screen";
-
     for (let i = 0; i < 8; i += 1) {
       const t = i / 7;
-      const y = state.height * (0.16 + i * 0.094);
+      const yRatio = 0.18 + t * 0.38;
+      const y = state.height * yRatio;
       const x =
         state.width * (0.5 + Math.sin(state.time * 0.14 + i * 0.84) * 0.06);
       const rx = state.width * (0.24 + i * 0.04);
       const ry = state.height * (0.08 + i * 0.022);
-      drawSoftEllipse(x, y, rx, ry, 0.006 + i * 0.0016, 0.42 + t * 0.38, 0);
+      drawSoftEllipseComposite(
+        x,
+        y,
+        rx,
+        ry,
+        0.005 + i * 0.0014,
+        yRatio,
+        0,
+        "source-over",
+        0.8,
+      );
     }
-
-    ctx.restore();
   }
 
   function drawDisturbanceVeils() {
@@ -705,10 +782,10 @@
       state.height,
     );
     glaze.addColorStop(0, "rgba(255,255,255,0)");
-    glaze.addColorStop(0.16, "rgba(255,255,255,0.015)");
-    glaze.addColorStop(0.32, "rgba(255,245,236,0.035)");
-    glaze.addColorStop(0.52, "rgba(255,160,62,0.02)");
-    glaze.addColorStop(0.78, "rgba(255,255,255,0.008)");
+    glaze.addColorStop(0.16, "rgba(255,255,255,0.012)");
+    glaze.addColorStop(0.32, "rgba(255,245,236,0.026)");
+    glaze.addColorStop(0.52, "rgba(255,160,62,0.018)");
+    glaze.addColorStop(0.78, "rgba(255,255,255,0.006)");
     glaze.addColorStop(1, "rgba(255,255,255,0)");
     ctx.fillStyle = glaze;
     ctx.fillRect(0, 0, state.width, state.height);
@@ -721,6 +798,7 @@
 
     drawBackdrop();
     drawSmokeBase();
+    drawUpperOrangeSmoke();
     renderParticles();
     drawAtmosphericHaze();
     drawDisturbanceVeils();

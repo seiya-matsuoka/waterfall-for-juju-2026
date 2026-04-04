@@ -40,16 +40,31 @@ body {
   overflow: hidden;
   touch-action: none;
   overscroll-behavior: none;
-  background: linear-gradient(
-    180deg,
-    #f6f0e7 0%,
-    #f4eee4 12%,
-    #efe6db 24%,
-    #ddd1c4 34%,
-    #6c3d2b 54%,
-    #140406 76%,
-    #050102 100%
-  );
+  background:
+    radial-gradient(
+      ellipse at 50% 34%,
+      rgba(255, 245, 236, 0.22) 0%,
+      rgba(255, 240, 226, 0.14) 20%,
+      rgba(255, 231, 214, 0.06) 38%,
+      rgba(255, 220, 202, 0) 58%
+    ),
+    linear-gradient(
+      180deg,
+      #f7f1e8 0%,
+      #f6f0e7 5%,
+      #f4ede3 10%,
+      #f2eadf 16%,
+      #eee4d8 22%,
+      #e7d9ca 28%,
+      #dcc8b7 34%,
+      #c8a78e 40%,
+      #ad7a5c 48%,
+      #8b563f 56%,
+      #633123 64%,
+      #3a1713 74%,
+      #180608 86%,
+      #060103 100%
+    );
 }
 
 #lark-canvas {
@@ -69,16 +84,16 @@ body {
   background:
     radial-gradient(
       circle at 50% 40%,
-      transparent 22%,
-      rgba(0, 0, 0, 0.04) 62%,
-      rgba(0, 0, 0, 0.34) 100%
+      transparent 24%,
+      rgba(0, 0, 0, 0.035) 66%,
+      rgba(0, 0, 0, 0.28) 100%
     ),
     linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.02),
+      rgba(255, 255, 255, 0.015),
       transparent 18%,
       transparent 82%,
-      rgba(0, 0, 0, 0.18)
+      rgba(0, 0, 0, 0.16)
     );
   mix-blend-mode: multiply;
 }
@@ -101,7 +116,7 @@ body {
   left: 61%;
   top: 18%;
   transform: translate(-50%, -50%) rotate(-7deg);
-  color: rgba(255, 163, 58, 0.22);
+  color: rgba(255, 136, 20, 0.28);
   font-size: clamp(18px, 4.6vw, 28px);
   font-weight: 600;
   letter-spacing: 0.12em;
@@ -109,8 +124,8 @@ body {
   user-select: none;
   mix-blend-mode: multiply;
   text-shadow:
-    0 0 10px rgba(255, 248, 238, 0.14),
-    0 0 16px rgba(255, 142, 28, 0.12);
+    0 0 10px rgba(255, 248, 238, 0.08),
+    0 0 16px rgba(255, 132, 18, 0.08);
 }
 
 .motion-permission-button {
